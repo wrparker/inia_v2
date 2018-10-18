@@ -18,6 +18,6 @@ which pip
 echo "Installing Requirements"
 pip install -r requirements.frozen --index https://pypi.org/simple
 echo "Performing Migrations"
-#python proj/manage.py migrate
+python proj/manage.py migrate
 deactivate
 echo "Environment Installed... make sure .env is available."
