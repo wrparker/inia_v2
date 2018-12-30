@@ -15,45 +15,52 @@ class Publication(models.Model):
     htmlid = models.CharField(max_length=255) # journal paper htmlid
 
 
-class TreatmentType(enum.Enum):
-    DID = "DID"
-    NONE = "NONE"
-    CIA = "CIA"
-    EOD = "EOD"
-    LPS = "LPS"
-
 class Dataset(models.Model):
+    TREATMENT_DID = "DID"
+    TREATMENT_NONE = "NONE"
+    TREATMENT_CIA = "CIA"
+    TREATMENT_EOD = "EOD"
+    TREATMENT_LPS = "LPS"
+
+    TREATMENT_CHOICES = (
+        (TREATMENT_DID, "DID"),
+        (TREATMENT_NONE, "NONE"),
+        (TREATMENT_CIA, "CIA"),
+        (TREATMENT_EOD, "EOD"),
+        (TREATMENT_LPS, "LPS"),
+    )
+
     legacy_id = models.IntegerField()
     name = models.CharField(max_length=100)
-    treatment = enum.EnumField(TreatmentType)
+    treatment = models.CharField(max_length=255, choices=TREATMENT_CHOICES)
+    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
 
 
-class SpeciesType(enum.Enum):
+class SpeciesType(object):
     ''' The values of these enums are based on the NCBI taxonomy ID:
     https://www.ncbi.nlm.nih.gov/Taxonomy
     '''
     UNKNOWN = 'UNKNOWN'
-    HOMO_SAPIENS = 'HOMO_SAPIENS'  # Human
-    MUS_MUSCULUS = 'MUS_MUSCULUS'    # Mouse https://www.uniprot.org/taxonomy/10090
-    RATTUS_NORVEGICUS = 'RATTUS_NORVEGICUS'  # Rat
+    HOMO_SAPIENS = 'HOMO SAPIENS'  # Human tax id: 9606
+    MUS_MUSCULUS = 'MUS MUSCULUS'    # Mouse tax id: 10090
+    RATTUS_NORVEGICUS = 'RATTUS NORVEGICUS'  # Rat 10116
 
-    labels = {
-        HOMO_SAPIENS: 'Human (Homo sapiens)',
-        MUS_MUSCULUS: 'Mouse (Mus musculus)',
-        RATTUS_NORVEGICUS: 'Rat (Rattus Norvegicus)'
-    }
-
+    SPECIES_CHOICES = (
+        (HOMO_SAPIENS, 'HOMO SAPIENS'),
+        (MUS_MUSCULUS, 'MUS MUSCULUS'),
+        (RATTUS_NORVEGICUS, 'RATTUS NORVEGICUS')
+    )
 
 class Homologene(models.Model):
     '''This is basically just a lookup table that is populated by NCBI Homologene Database:
     https://www.ncbi.nlm.nih.gov/homologene
     Items that share the same homlogene_group_id across species are homologenes.
     '''
-    homologene_group_id = models.IntegerField()
+    homologene_group_id = models.IntegerField(db_index=True)
     gene_symbol = models.CharField(max_length=255)
     created_at = models.DateField(auto_now=True)
     updated_at = models.DateField(auto_now=True)
-    species = enum.EnumField(SpeciesType)
+    species = models.CharField(choices=SpeciesType.SPECIES_CHOICES, max_length=255)
     brain = models.BooleanField()  # This is pre-determined by...
 
 class regulationDirection(enum.Enum):
@@ -67,24 +74,33 @@ class IniaGene(models.Model):  # Genes we do through experimentation
 
     '''
 
+    DIRECTION_UP = "UP"
+    DIRECTION_DOWN = "DOWN"
 
-    legacy_id = models.IntegerField()  # From version 1.
+    DIRECTION_CHOICES = (
+        (DIRECTION_UP, "UP"),
+        (DIRECTION_DOWN, "DOWN")
+    )
+
+
+    legacy_id = models.IntegerField(db_index=True)  # From version 1.
     uniqueID = models.CharField(max_length=255)  # This is some NIH variable.  WE should name it something better.
     microarray = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
     phenotype = models.CharField(max_length=255)
-    species = enum.EnumField(SpeciesType)  ## TODO: Make sepcies something better
+    species = models.CharField(max_length=255, choices=SpeciesType.SPECIES_CHOICES)
     brain_region = models.CharField(max_length=255)
     paradigm = models.CharField(max_length=255)
     paradigm_duration = models.CharField(max_length=255)
     alcohol = models.BooleanField()
-    gene_symbol = models.CharField(max_length=255)
+    gene_symbol = models.CharField(max_length=255, blank=True)
     gene_name = models.CharField(max_length=255)
-    p_value = models.FloatField()  # stats
+    p_value = models.FloatField(null=True, blank=True)  # stats
     fdr = models.FloatField()   # false discovery rate
-    direction = enum.EnumField(regulationDirection)
+    direction = models.CharField(max_length=255, choices=DIRECTION_CHOICES)
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
     dataset = models.ForeignKey(Dataset, on_delete=models.PROTECT)
+    homologenes = models.ManyToManyField(Homologene)
     updated = models.DateTimeField(auto_now=True)
 
 
