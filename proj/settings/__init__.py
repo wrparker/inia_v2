@@ -11,9 +11,18 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+PROJECT_DIR = os.path.dirname(BASE_DIR)  #Outside of django directory, where .env file lives.
+LOGGING_DIR = os.path.join(PROJECT_DIR, 'logs')
+print (os.path.join(PROJECT_DIR, '.env'))
+
+load_dotenv(os.path.join(PROJECT_DIR, '.env'))
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'dev')
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'inia'
+    'inia',
+    #'api',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'inia.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -77,9 +87,74 @@ WSGI_APPLICATION = 'inia.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'USER': 'root',
-        'PASSWORD': 'pass',
-        'NAME': 'inia'
+        'USER': os.getenv('DB_USER', False),
+        'PASSWORD': os.getenv('DB_PASSWORD', False),
+        'NAME': os.getenv('DB_NAME', False),
+        'HOST': os.getenv('DB_HOST', False),
+        'PORT': os.getenv('DB_PORT', False),
+    }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'logfile_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, "debug.log"),
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+        'logfile_info': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, "info.log"),
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+        'logfile_error': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, "error.log"),
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+
+        'console':{
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['console'],
+            'propagate': True,
+            'level': 'WARN',
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'application': {
+            'handlers': ['console', 'logfile_debug', 'logfile_info', 'logfile_error'],
+            'level': 'INFO',
+        },
     }
 }
 
@@ -121,3 +196,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+static_dir = os.path.join(BASE_DIR, '/static')
+STATICFILES_DIRS = [
+    static_dir
+]
+
+# Load variables based on environment:
+# TODO: come back.
+if ENVIRONMENT == 'dev':
+    from .local_dev import *
+
+elif ENVIRONMENT == 'prod':
+    from .local_prod import *

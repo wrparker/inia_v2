@@ -3,6 +3,9 @@ from inia.models import Publication, IniaGene, Homologene, Dataset, GeneAliases
 from datetime import datetime
 import pandas as pd
 import os
+import logging
+
+_LOG = logging.getLogger('application.'+__name__)
 
 class Command(BaseCommand):
     help = 'Seeds initial data for database application.  Should only be used initially and then disbaled.'
@@ -11,6 +14,13 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        '''
+        This command should not be run, but not removing code for it incase it is needed in the future.  For now the
+        command will exit if called to prevent accidenal calling.
+        '''
+        _LOG.info("Preventing seed_initial_data from running.  Exiting 0")
+        exit(0)
+
         _INIT_DATA_DIRECTORY = os.path.join(os.path.dirname(__file__),
                                            '..',
                                            '..',
@@ -19,8 +29,8 @@ class Command(BaseCommand):
                                            'data_seed',
                                            'flat_data',
                                            '{}')
-        #print (_INIT_DATA_DIRECTORY.format('publications.tsv'))
-            # Publications first...
+
+        # Publications first...
 
         if not Publication.objects.all():
             pubs = pd.read_csv(_INIT_DATA_DIRECTORY.format('publications.tsv'), sep='\t', engine='python')
@@ -38,7 +48,7 @@ class Command(BaseCommand):
                     date_sub=datetime.strptime(row['date'], '%Y-%M-%d')
                 )
         else:
-            print ("Publication entries exist... skipping.")
+            _LOG.info ("Publication entries exist... skipping.")
 
         # Import Datasets.
         if not Dataset.objects.all():
@@ -51,7 +61,7 @@ class Command(BaseCommand):
                     treatment=row['treatment_type'].strip('"').upper(),
                     publication=related_pub)
         else:
-            print("Dataset entries exist... skipping.")
+            _LOG.info("Dataset entries exist... skipping.")
 
         # Import homologenes
         species = {
@@ -62,12 +72,12 @@ class Command(BaseCommand):
         if not Homologene.objects.all():
             homologenes = pd.read_csv(_INIT_DATA_DIRECTORY.format('homologene_reduced.data'), sep='\t', engine='python')
             lines = []
-            print ("Opening HID BRain file..")
+            _LOG.info ("Opening HID BRain file..")
             with open(_INIT_DATA_DIRECTORY.format('HID_Brain.txt', 'r')) as f:
                 lines = f.read().splitlines()
             lines = [int(i) for i in lines]
 
-            print ("Creating homologenes.... this make take a while.")
+            _LOG.info ("Creating homologenes.... this make take a while.")
             homologene_items = []
             for index, row in homologenes.iterrows():
                 # Faster to make them all in memory first...
@@ -79,14 +89,14 @@ class Command(BaseCommand):
                     brain=(True if int(row['h_id']) in lines else False) )
                 )
             Homologene.objects.bulk_create(homologene_items)
-            print ("Success!")
+            _LOG.info ("Success!")
         else:
-            print("Information already exists for homologenes... not fililing")
+            _LOG.info("Information already exists for homologenes... not fililing")
 
         # Import IniaGenes... fun one now :o
 
         if not IniaGene.objects.all():
-            print ("Constructing Inia genes and gene relationships.")
+            _LOG.info ("Constructing Inia genes and gene relationships.")
             lines = []
             with open(_INIT_DATA_DIRECTORY.format('genes.tsv')) as f:
                 lines = f.readlines()
@@ -140,7 +150,7 @@ class Command(BaseCommand):
                     else:
                         values['pvalue'] = None
                 except:
-                    print("Couldn't float {} on gene {}-{}".format(values['pvalue'], values['geneSymbol'], values['legacy_id']))
+                    _LOG.error("Couldn't float {} on gene {}-{}".format(values['pvalue'], values['geneSymbol'], values['legacy_id']))
                     exit(0)
                 newGene = IniaGene.objects.create(
                     legacy_id=values['legacy_id'],
@@ -170,3 +180,5 @@ class Command(BaseCommand):
                 # Now Add conversions (homologenes).
                 homogenes = Homologene.objects.filter(homologene_group_id=values['conversion'])
                 newGene.homologenes.add(*list(homogenes))
+        else:
+            _LOG.info("Skipping INIA genes since values already exist.")

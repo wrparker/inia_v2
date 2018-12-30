@@ -13,11 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import re_path, include
-from . import views
+from django.contrib import admin
+from django.urls import path, include, re_path
 
-app_name = 'inia'  # required by django.
 
 urlpatterns = [
-    re_path('^$', views.index, name='index')
+    re_path(r'^', include('inia.urls', namespace='inia')), #inia/urls.py controls top level urls.
+    # re_path(r'^api/', include(('api.urls', 'api'), namespace='api')),  # For future API
+    re_path('^admin/', admin.site.urls),
 ]

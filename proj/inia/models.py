@@ -1,5 +1,7 @@
+'''
+models.py contains the ORM structure and programmable database structure.
+'''
 from django.db import models
-from django_enumfield import enum
 
 
 class Publication(models.Model):
@@ -63,9 +65,6 @@ class Homologene(models.Model):
     species = models.CharField(choices=SpeciesType.SPECIES_CHOICES, max_length=255)
     brain = models.BooleanField()  # This is pre-determined by...
 
-class regulationDirection(enum.Enum):
-    UP = "UP"
-    DOWN = "DOWN"
 
 class IniaGene(models.Model):  # Genes we do through experimentation
     '''IniaGenes are like data points that are collected from an experiment.  You use Homologene to convert across
