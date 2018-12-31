@@ -1,10 +1,52 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>My Project</title>
-    </head>
+  <head>
+    <title>IT-GED</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="IT-GED is a database containing an aggregation of significant high alcohol consumption microarray data." />
+    <meta name="keywords" content="IT-GED, IT-GED, ITGED, I-GED, IGED, INIA Gene Expression Database, INIA Texas Gene Expression Database, INIA, gene, gene expression, microarray, alcohol, alcoholism" />
 
-    <body>
-    {% block content %}{% endblock content %}
-    </body>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static "css/inia.css" %}" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- Leave those next 4 lines if you care about users using IE8 -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+  <div class="wrapper">
+    <!-- Sidebar -->
+    {% include '_sidebar.html' %}
+    <!-- Page Content -->
+    <div id="content" class="container-fluid mr-2 mb-2">
+            <!-- A grey horizontal navbar that becomes vertical on small screens -->
+        {% include '_navbar.html' %}
+        <div class="main_content">
+
+            {% block content %}
+            {% endblock %}
+            <div class="content_disclaimer">
+                <strong>Please note</strong>: This site is still under construction.
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  </body>
+<footer>© 2011-2018 INIA/WCAAR</footer>
 </html>

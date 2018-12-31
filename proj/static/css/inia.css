@@ -1,0 +1,180 @@
+body{
+    background-color: #1A5991 !important;
+}
+
+.inia_sidebar{
+    max_width: 275px;
+}
+
+.main_content{
+    background-color: #84BCD6;
+    border-radius:.25rem!important;
+    padding:10px;
+}
+
+.wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    padding-left:5px;
+    padding-top:10px;
+}
+
+#content {
+    padding-top:10px;
+}
+
+.content_disclaimer{
+    padding-top:10px;
+    padding-left: 10px;
+}
+
+p {
+    font-size:1.25em;
+}
+
+a {
+    color: #000000;
+    text-decoration: underline;
+}
+
+footer{
+    color:white;
+    text-align:right;
+    padding:10px;
+}
+
+/* Navbar on top of content... */
+.logo_text{
+    margin-top:7px;
+    margin:0;
+    width:500px;
+    height:auto;
+}
+.page_nav{
+    background-color:#1A5991;
+}
+
+.page_nav .navbar-nav a {
+    color:#FFFFFF;
+}
+
+.page_nav .navbar-nav .nav-item{
+    margin-left:10px;
+}
+
+.page_nav .navbar-nav a{
+    border-left: #3AB8FC solid 10px;
+    min-width:65px;
+    text-decoration:none;
+    font-weight:bold;
+    padding:0;
+}
+
+.page_nav .navbar-nav a:hover{
+    border-left: #FFFFFF solid 10px;
+    background-color:#3AB8FC;
+}
+
+.page_nav .navbar-nav a:active{
+    border-left: #FFFFFF solid 10px;
+    color:#3AB8FC;
+}
+
+
+
+/* Home page carousel */
+
+#carouselExampleCaptions{
+    max-width:600px;
+    margin: 0 auto;
+}
+
+.carousel-caption{
+    background:rgba(0,0,0,0.5);
+    padding:0;
+    padding-right:5px;
+    text-align:center;
+    margin:0;
+}
+.carousel-control-next-icon, .carousel-control-prev-icon{
+    background-color:black;
+}
+
+
+.carousel-indicators{
+    padding-top:10px;
+}
+
+
+/* Analysis Home Tabs.. */
+.analysis-tabs-wrapper{
+    background-color:#FFFFFF;
+    max-width:950px;
+    margin: 0 auto;
+    min-height:120px;
+}
+.analysis-tabs-wrapper .nav-tabs{
+    border-bottom: none;
+}
+
+.analysis-home-tab-item{
+    border: solid #1A5991;
+    padding:10px;
+    padding:0.5em;
+    margin-top:0.5em;
+    min-height:150px;
+    text-align:left;
+}
+
+.analysis-home-tab-item h2{
+    text-decoration:underline;
+}
+
+.analysis-home-tab-item a{
+    text-decoration:none;
+}
+
+.analysis-home-tab-item p{
+    font-size:0.98em;
+}
+
+.analysis-home-tab-item a:hover{
+    text-decoration:none;
+}
+
+.analysis-home-tab-item img{
+    float:left;
+    margin-right:10px;
+    min-height:100%;
+}
+
+.analysis-home-tab-item:hover{
+    background-color:#84BCD6;
+
+}
+
+.analysis-home-nav-item{
+    font-size: 1.3em;
+    background-color: #cccccc;
+}
+.analysis-home-nav-item a .nav-tabs .nav-link {
+    text-deccoration:none !important;
+}
+
+
+/* Common/shared classes... */
+.abbreviation-info{
+    border: 1px solid #1A5991;
+    background: #50ACD3;
+    padding-left:3px;
+    padding-right:3px;
+    padding-bottom: 0;
+    line-height:0.9em;
+    margin-bottom:0px;
+    margin-top:5px;
+}

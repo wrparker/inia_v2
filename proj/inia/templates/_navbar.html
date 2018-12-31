@@ -1,0 +1,31 @@
+{% load static %}
+<img src="{% static 'images/logo_text.png' %}" class="logo_text">
+<nav class="navbar navbar-expand-sm page_nav">
+
+  <!-- Links -->
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="#">home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">search</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'inia:analysis_home' %}">analysis</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'inia:datasets_home' %}">datasets</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">links</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">help</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">about</a>
+    </li>
+
+  </ul>
+
+</nav>

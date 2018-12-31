@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2><strong>ANALYSIS</strong></h2>
+
+<p>Select an analysis tool below:</p>
+<div class="analysis-tabs-wrapper">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item analysis-home-nav-item">
+        <a class="nav-link active" id="genes-tab" data-toggle="tab" href="#genes" role="tab" aria-controls="home" aria-selected="true">Genes</a>
+      </li>
+      <li class="nav-item analysis-home-nav-item">
+        <a class="nav-link" id="datasets-tab" data-toggle="tab" href="#datasets" role="tab" aria-controls="profile" aria-selected="false">Datasets</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="genes" role="tabpanel" aria-labelledby="genes-tab">
+          <!-- Content for Genes Tab -->
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/multiple_gene_analysis_home.png' %}"/>
+                   <h2>Multiple Gene Analysis</h2>
+                    <p>Create a custom dataset using your own dataset or favorite genes, then compare this dataset to
+                        those in IT-GED or visualize the IT-GED interactions between your genes.</p>
+                </a>
+            </div>
+
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/most_connected_analysis_home.png' %}"/>
+                   <h2>Most-Connected Genes</h2>
+                    <p>See the genes that appear in the largest number of IT-GED datasets. The repeated significance of
+                        these genes suggests their importance in the brain's genetic response to alcohol.</p>
+                </a>
+            </div>
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/reverse_network_analysis_home.png' %}"/>
+                   <h2>Reverse Network Analysis</h2>
+                    <p>Enter your favorite gene to find all the IT-GED genes that were significantly co-expressed with your gene.</p>
+                </a>
+            </div>
+
+        </div>
+        <div class="tab-pane fade" id="datasets" role="tabpanel" aria-labelledby="datasets-tab">
+          <!-- Content for Datasets Tab -->
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/dataset_network_analysis_home.png' %}"/>
+                   <h2>Dataset Network</h2>
+                    <p>See how the IT-GED datasets overlap in both table and network form, and add your custom dataset to the analysis.</p>
+                </a>
+            </div>
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/boolean_data_analysis_home.png' %}"/>
+                   <h2>Boolean Dataset Comparison</h2>
+                    <p>Determine the extent of overlap between two IT-GED datasets, and generate the intersection and
+                        union datasets of any number of IT-GED datasets.</p>
+                </a>
+            </div>
+            <div class="analysis-home-tab-item">
+                <a href="#">
+                <img src="{% static 'images/custom_data_analysis_home.png' %}"/>
+                   <h2>Custom Dataset Generation</h2>
+                    <p>An advanced search tool: combine multiple parameters together to build your own custom IT-GED
+                        dataset for use in other analysis tools.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

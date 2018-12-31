@@ -196,10 +196,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-static_dir = os.path.join(BASE_DIR, '/static')
-STATICFILES_DIRS = [
-    static_dir
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')  # proj/static/
+                    ]
 
 # Load variables based on environment:
 # TODO: come back.

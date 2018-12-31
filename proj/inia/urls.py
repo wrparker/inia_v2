@@ -19,5 +19,9 @@ from . import views
 app_name = 'inia'  # required by django.
 
 urlpatterns = [
-    re_path('^$', views.index, name='index')
+    re_path('^$', views.index, name='index'),
+    re_path('^analysis/$', views.analysis_home, name='analysis_home'),
+    re_path('^datasets/$', views.datasets, name='datasets_home'),
+    re_path('^publications/$', views.datasets, name='publications_rdr'),
+
 ]

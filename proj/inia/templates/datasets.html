@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h2><strong>DATASETS AND PUBLICATIONS</strong></h2>
+ {% include '_abbreviation_info.html' %}
+
+<p>
+    Use the <a href="#"Boolean Dataset Comparison tool</a> to find the Boolean intersection and union of any combination
+    of IT-GED datasets.
+</p>
+<p>
+    Use the <a href="#">Dataset Network tool</a> to see how the IT-GED datasets overlap in both table and network form, and add your custom dataset to the analysis.
+</p>
+<p style="text-align:center; border-top:solid 1px black">
+    Jump to <a href="#">datasets by brain region</a>.
+</p>
+<p>
+    The datasets in IT-GED come from the following publications, sorted by date. Click on a publication title to access
+    the publication. Click on a publication ID to view all the genes from a given publication. Click on a dataset ID to
+    view all the genes from a given dataset.
+</p>
+    {% for pub in publications %}
+    <a href="{{ pub.url }}">{{ pub.title }}</a><br />
+        {{ pub.date_sub }}, {{ pub.journal }}<br />
+        {{ pub.authors }}<br />
+        ID: <a href="#">{{pub.htmlid}}</a><br>
+        Alcohol on board: !!TODO: FIGURE OUT ALCOHOL!!
+        INIA Model:
+        --
+
+
+    {% endfor %}
+
+
+{% endblock %}
