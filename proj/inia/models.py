@@ -4,6 +4,21 @@ models.py contains the ORM structure and programmable database structure.
 from django.db import models
 
 
+class SpeciesType(object):
+    ''' The values of these enums are based on the NCBI taxonomy ID:
+    https://www.ncbi.nlm.nih.gov/Taxonomy
+    '''
+    UNKNOWN = 'UNKNOWN'
+    HOMO_SAPIENS = 'HOMO SAPIENS'  # Human tax id: 9606
+    MUS_MUSCULUS = 'MUS MUSCULUS'    # Mouse tax id: 10090
+    RATTUS_NORVEGICUS = 'RATTUS NORVEGICUS'  # Rat 10116
+
+    SPECIES_CHOICES = (
+        (HOMO_SAPIENS, 'HOMO SAPIENS'),
+        (MUS_MUSCULUS, 'MUS MUSCULUS'),
+        (RATTUS_NORVEGICUS, 'RATTUS NORVEGICUS')
+    )
+
 class Publication(models.Model):
     legacy_id = models.IntegerField()
     authors = models.TextField()
@@ -36,22 +51,15 @@ class Dataset(models.Model):
     name = models.CharField(max_length=100)
     treatment = models.CharField(max_length=255, choices=TREATMENT_CHOICES)
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
+    microarray = models.CharField(max_length=255)
+    model = models.CharField(max_length=255)
+    phenotype = models.CharField(max_length=255)
+    species = models.CharField(max_length=255, choices=SpeciesType.SPECIES_CHOICES)
+    brain_region = models.CharField(max_length=255)
+    paradigm = models.CharField(max_length=255)
+    paradigm_duration = models.CharField(max_length=255)
+    alcohol = models.BooleanField()
 
-
-class SpeciesType(object):
-    ''' The values of these enums are based on the NCBI taxonomy ID:
-    https://www.ncbi.nlm.nih.gov/Taxonomy
-    '''
-    UNKNOWN = 'UNKNOWN'
-    HOMO_SAPIENS = 'HOMO SAPIENS'  # Human tax id: 9606
-    MUS_MUSCULUS = 'MUS MUSCULUS'    # Mouse tax id: 10090
-    RATTUS_NORVEGICUS = 'RATTUS NORVEGICUS'  # Rat 10116
-
-    SPECIES_CHOICES = (
-        (HOMO_SAPIENS, 'HOMO SAPIENS'),
-        (MUS_MUSCULUS, 'MUS MUSCULUS'),
-        (RATTUS_NORVEGICUS, 'RATTUS NORVEGICUS')
-    )
 
 class Homologene(models.Model):
     '''This is basically just a lookup table that is populated by NCBI Homologene Database:
@@ -84,14 +92,6 @@ class IniaGene(models.Model):  # Genes we do through experimentation
 
     legacy_id = models.IntegerField(db_index=True)  # From version 1.
     uniqueID = models.CharField(max_length=255)  # This is some NIH variable.  WE should name it something better.
-    microarray = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
-    phenotype = models.CharField(max_length=255)
-    species = models.CharField(max_length=255, choices=SpeciesType.SPECIES_CHOICES)
-    brain_region = models.CharField(max_length=255)
-    paradigm = models.CharField(max_length=255)
-    paradigm_duration = models.CharField(max_length=255)
-    alcohol = models.BooleanField()
     gene_symbol = models.CharField(max_length=255, blank=True)
     gene_name = models.CharField(max_length=255)
     p_value = models.FloatField(null=True, blank=True)  # stats
