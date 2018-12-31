@@ -18,10 +18,10 @@ class Command(BaseCommand):
         This command should not be run, but not removing code for it incase it is needed in the future.  For now the
         command will exit if called to prevent accidenal calling.
         '''
-        '''
+
         _LOG.info("Preventing seed_initial_data from running.  Exiting 0")
         exit(0)
-        '''
+
 
         _INIT_DATA_DIRECTORY = os.path.join(os.path.dirname(__file__),
                                            '..',
