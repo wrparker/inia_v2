@@ -32,6 +32,9 @@ class Publication(models.Model):
     display = models.CharField(max_length=255)
     htmlid = models.CharField(max_length=255) # journal paper htmlid
 
+    def get_short_name(self):
+        return '{} et al. {}'.format(self.authors.split(' ')[0], self.date_sub.strftime('%Y'))
+
     def get_submit_day(self):
         return self.date_sub.date()
 
