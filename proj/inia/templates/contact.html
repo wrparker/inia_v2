@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h2><strong>CONTACT</strong></h2>
+    <br />
+Your questions are welcome and your feedback is greatly appreciated.
+We also accept feature requests, though we can't guarantee implementation or a timetable.
+Your email address will be used only to reply to inquiries.
+<br /> <br />
+    <form action="#" method="POST" >
+    {% csrf_token %}
+{% for field in contact_form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }}<br /> {{ field }}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+    </div>
+    <br />
+{% endfor %}
+    <input type="submit" />
+    </form>
+<br /> <br />
+If after filling out this form you have not heard back from us within a few days, please
+<a target="_blank" href="https://directory.utexas.edu/index.php?q=im464827&scope=all&submit=Search">contact Dr. Igor Ponomarev directly.</a>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2><strong>LINKS</strong></h2>
+    <br>
+
+This page contains links to other tools that may be of use to alcohol researchers.
+<br /><br />
+
+<p><a href="http://phenogen.ucdenver.edu/PhenoGen">PhenoGen Informatics</a><br />
+    <small>The University of Colorado at Denver</small>
+</p>
+
+
+<p><a href="http://geneweaver.org/">GeneWeaver</a><br />
+    <small>The Jackson Laboratory</small>
+</p>
+
+
+<p><a href="http://www.genenetwork.org/">GeneNetwork</a> <br />
+    <small>The University of Tennessee</small>
+</p>
+
+<p>
+<a href="http://bioinfo.mc.vanderbilt.edu/ERGR">ERGR: Ethanol-Related Gene Resource</a> <br/>
+    <small>Bioinfomatics and Systems Biology Laboratory, Vanderbilt University</small>
+</p>
+
+If you would like to submit your tool, please <a href="{% url 'inia:contact' %}">contact us</a>. Please note that we will not link to institutions at this time.
+{% endblock %}

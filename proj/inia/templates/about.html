@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2><strong>ABOUT</strong></h2>
+
+    <p>IT-GED is a project of <a target="_blank" href="http://www.scripps.edu/cnad/inia/">INIA West</a>
+        and the
+    <a target="_blank" href="http://www.utexas.edu/research/wcaar/">Waggoner Center for Alcohol and Addiction Research</a>
+        at the
+        <a target ="_blank" href="http://www.utexas.edu/">University of Texas at Austin</a>.
+        The PI is Dr. Igor Ponomarev and primary web development is by Sebastien Weyn.</p>
+
+    <p>IT-GED is supported by</p>
+    <ul>
+        <li>
+        an NIH, NIAAA grant (P20AA0107838)
+        </li>
+    </ul>
+    <ul>
+        <li>
+        an NIH, NIAAA K award to Igor Ponomarev (AA017234)
+        </li>
+    </ul>
+    <ul>
+        <li>
+        a pilot grant from INIA West (U01AA013517) to help meet the following INIA West goals:
+            <ul><li>To <strong>identify specific clusters of genes whose expression is regulated by alcohol</strong>
+                and which are responsible for any given model of excessive alcohol consumption
+                using gene expression arrays, differential display, mutagenesis
+                directed at specific brain areas, and <strong>the development of new informatics
+                tools to analyze and interpret gene expression, cellular circuitry and
+                    brain circuitry data</strong> with the use of transgenic and knockout approaches.</li>
+            <li>
+                To attract new and innovative investigators to the field
+                of alcohol research by recruiting individuals for development of
+                U01 grants and pilot projects and by developing online interactive
+                capacity among INIA scientists and others, and <strong>by making the neuroinformatics integrated
+                data sets accessible, searchable and interactive with other databases</strong> for all
+                scientists interested in alcoholism research.
+            </li></ul>
+        </li>
+    </ul>
+<br />
+<img src="{% static 'images/utexas_text.png' %}" style="display:block;margin:0 auto" />
+    <br />
+<img src="{% static 'images/wcaar4_sm.png' %}" style="display:block;margin:0 auto"  />
+{% endblock %}

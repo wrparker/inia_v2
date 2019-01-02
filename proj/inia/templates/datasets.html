@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
+{% load inia_extras %}
 {% block content %}
 <h2><strong>DATASETS AND PUBLICATIONS</strong></h2>
- {% include '_abbreviation_info.html' %}
 
+{% include '_abbreviation_info.html' with brain_regions=brain_regions %}
+
+<br />
 <p>
     Use the <a href="#"Boolean Dataset Comparison tool</a> to find the Boolean intersection and union of any combination
     of IT-GED datasets.
@@ -12,7 +15,7 @@
     Use the <a href="#">Dataset Network tool</a> to see how the IT-GED datasets overlap in both table and network form, and add your custom dataset to the analysis.
 </p>
 <p style="text-align:center; border-top:solid 1px black">
-    Jump to <a href="#">datasets by brain region</a>.
+    Jump to <a href="#data_by_region">datasets by brain region</a>.
 </p>
 <p>
     The datasets in IT-GED come from the following publications, sorted by date. Click on a publication title to access
@@ -20,16 +23,34 @@
     view all the genes from a given dataset.
 </p>
     {% for pub in publications %}
-    <a href="{{ pub.url }}">{{ pub.title }}</a><br />
-        {{ pub.date_sub }}, {{ pub.journal }}<br />
+    <strong><a href="{{ pub.url }}">{{ pub.title }}</a></strong><br />
+        {{ pub.get_submit_day }}, {{ pub.journal }}<br />
         {{ pub.authors }}<br />
-        ID: <a href="#">{{pub.htmlid}}</a><br>
-        Alcohol on board: !!TODO: FIGURE OUT ALCOHOL!!
-        INIA Model:
-        --
-
-
+        ID: <strong><a href="#">{{pub.htmlid}} <small>({{pub.get_number_pub_genes}})</small></a></strong><br>
+        Alcohol on board: {{ pub.alcohol|yesno:"YES, NO" }}<br>
+        INIA Model: {{pub.get_model}}<br>
+        Phenotype: {{ pub.get_phenotype }}<br>
+        Paradigm: {{ pub.get_paradigm }}<br>
+        Datasets from this publication:
+        {% for ds in pub.dataset_set.all %}
+            <a href="#"><small>{{ ds.official_dataset_name }} ({{ ds.get_number_genes }})</a></small>
+                {% if not forloop.last %}, {% endif %}
+        {% endfor  %}
+        <br><br>
     {% endfor %}
+    <p style="text-align:center; border-top:solid 1px black" >&nbsp;</p>
+    <a name="data_by_region"></a><h3>Datasets by Brain Region</h3></a>
 
+    {% for key, info in info_by_region.items %}
+        <strong><a href="#">{{info.name }} ({{ info.total }})</a></strong><br>
+        {% for ds in info.datasets%}
+            <a href="#">
+                <small>{{ ds.official_dataset_name }} ({{ ds.get_number_genes }})</small>
+            </a>{% if not forloop.last %}, {% endif %}
+
+        {%  endfor %}
+        <br />
+        <br />
+    {% endfor %}
 
 {% endblock %}

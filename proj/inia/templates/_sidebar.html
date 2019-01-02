@@ -1,7 +1,9 @@
 {% load static %}
 <nav id="sidebar">
         <div class="sidebar-header">
-            <img src="{%static 'images/inia_logo.png' %}" />
+            <a class="nav-link" href="{% url 'inia:index' %}">
+                <img src="{%static 'images/inia_logo.png' %}" />
+            </a>
         </div>
 
         <ul class="list-unstyled components">

@@ -18,7 +18,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PROJECT_DIR = os.path.dirname(BASE_DIR)  #Outside of django directory, where .env file lives.
 LOGGING_DIR = os.path.join(PROJECT_DIR, 'logs')
-print (os.path.join(PROJECT_DIR, '.env'))
 
 load_dotenv(os.path.join(PROJECT_DIR, '.env'))
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'dev')
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'captcha',  # for django-recaptcha.
     'inia',
     #'api',
 ]
@@ -198,6 +198,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')  # proj/static/
                     ]
+
+# Google RECAPTCHA
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY', '')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY', '')
+NOCAPTCHA = True
+
 
 # Load variables based on environment:
 # TODO: come back.

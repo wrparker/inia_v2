@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
-from inia.models import Publication, IniaGene, Homologene, Dataset, GeneAliases
+from inia.models import Publication, IniaGene, Homologene, Dataset, GeneAliases, BrainRegion
 from datetime import datetime
 import pandas as pd
 import os
 import logging
+import uuid
 
 _LOG = logging.getLogger('application.'+__name__)
 
@@ -19,8 +20,41 @@ class Command(BaseCommand):
         command will exit if called to prevent accidenal calling.
         '''
 
-        _LOG.info("Preventing seed_initial_data from running.  Exiting 0")
-        exit(0)
+        #_LOG.info("Preventing seed_initial_data from running.  Exiting 0")
+        #exit(0)
+
+        ''' Generate Brain Regions '''
+        REGIONS ={'Accumbens': ['Acc', 'AccSh', 'AccC', 'Str'],
+            'Accumbens Core': ['AccC'],
+            'Accumbens Shell': ['AccSH'],
+            'Amygdala': ['Amy', 'CA', 'BA'],
+            'Basolateral Amygdala': ['BA'],
+            'Central Amygdala': ['CA'],
+            'Cerebellum': ['Cer'],
+            'Frontal Cortex': ['FC'],
+            'Hippocampus': ['Hip'],
+            'Olfactory Bulb': ['OB'],
+            'Stria Terminalis': ['BNST'],
+            'Striatum/Accumbens': ['Str'],
+            'Ventral Midbrain': ['VM'],
+            'Ventral Tegmental Area': ['VTA'],
+            'Whole Brain': ['WB']}
+        if not BrainRegion.objects.all():
+            for key, value in REGIONS.items():
+                if len(value) > 1:
+                    super = BrainRegion.objects.create(name=key,
+                                                       abbreviation=value[0],
+                                                       is_super_group=True)
+                    for subregion in value[1:]:
+                        obj = BrainRegion.objects.create(abbreviation=subregion,
+                                                         name='TEMP' + str(uuid.uuid4()))
+                        super.sub_groups.add(obj)
+                else:
+                    br, created = BrainRegion.objects.get_or_create(abbreviation=value[0])
+                    br.name = key
+                    br.save()
+
+
 
 
         _INIT_DATA_DIRECTORY = os.path.join(os.path.dirname(__file__),
@@ -61,6 +95,34 @@ class Command(BaseCommand):
             datasets = pd.read_csv(_INIT_DATA_DIRECTORY.format('datasets.tsv'), sep='\t', engine='python')
             for index, row in datasets.iterrows():
                 related_pub = Publication.objects.get(legacy_id=row['publication'])
+                related_brain_region = BrainRegion.objects.get(
+                    name=datasetInfo[str(row['legacy_id'])]['brain_region']
+                )
+                official_dataset_name = "???"
+                if related_pub.htmlid == 'fer2017':
+                    official_dataset_name ='fer2017none_'+related_brain_region.abbreviation
+                elif related_pub.htmlid == 'ost2013':
+                    official_dataset_name = 'ost2013'
+                    if row['treatment_type'].strip('"').lower() == 'chronic':
+                        official_dataset_name += 'chronic_'
+                    else:
+                        official_dataset_name += row['treatment_type'].strip('"').upper()
+                    official_dataset_name += '_'
+                    official_dataset_name += related_brain_region.abbreviation
+                elif related_pub.htmlid == 'pon2012':
+                    official_dataset_name = 'pon2012' + row['treatment_type'].strip('"').upper() + '_' + related_brain_region.abbreviation
+                elif related_pub.htmlid == 'mul2011':
+                    official_dataset_name = 'mul2011' + row['treatment_type'].strip('"').upper()+ '_' + related_brain_region.abbreviation
+                elif related_pub.htmlid == 'kim2007':
+                    official_dataset_name = 'kim2007none_'+related_brain_region.abbreviation
+                elif related_pub.htmlid == 'mul2006':
+                    official_dataset_name = 'mul2006none_'+related_brain_region.abbreviation
+
+                normalized_treatment = row['treatment_type'].strip('"').upper()
+                if normalized_treatment == '':
+                    normalized_treatment = 'NONE'
+                if not normalized_treatment:
+                    normalized_treatment = 'NONE'
                 Dataset.objects.create(
                     legacy_id=row['legacy_id'],
                     name=row['name'].strip('"'),
@@ -70,14 +132,14 @@ class Command(BaseCommand):
                     model=datasetInfo[str(row['legacy_id'])]['model'],
                     phenotype=datasetInfo[str(row['legacy_id'])]['phenotype'],
                     species=datasetInfo[str(row['legacy_id'])]['species'],
-                    brain_region=datasetInfo[str(row['legacy_id'])]['brain_region'],
+                    brain_region=related_brain_region,
                     paradigm=datasetInfo[str(row['legacy_id'])]['paradigm'],
                     paradigm_duration=datasetInfo[str(row['legacy_id'])]['paradigm_duration'],
                     alcohol=datasetInfo[str(row['legacy_id'])]['alcohol'],
+                    official_dataset_name=official_dataset_name
                 )
         else:
             _LOG.info("Dataset entries exist... skipping.")
-
         # Import homologenes
         species = {
             '9606': 'HOMO SAPIENS',

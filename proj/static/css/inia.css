@@ -85,6 +85,21 @@ footer{
     color:#3AB8FC;
 }
 
+.dropdown:hover > .dropdown-menu {
+    display: block;
+}
+.dropdown > .dropdown-toggle:active {
+    /*Without this, clicking will make it sticky*/
+    pointer-events: none;
+}
+
+.dropdown-item{
+    background-color: #3AB8FC;
+}
+
+.dropdown-item a:hover{
+    text-decoration: underline;
+}
 
 
 /* Home page carousel */

@@ -19,6 +19,7 @@ class SpeciesType(object):
         (RATTUS_NORVEGICUS, 'RATTUS NORVEGICUS')
     )
 
+
 class Publication(models.Model):
     legacy_id = models.IntegerField()
     authors = models.TextField()
@@ -30,6 +31,52 @@ class Publication(models.Model):
     url = models.CharField(max_length=255)
     display = models.CharField(max_length=255)
     htmlid = models.CharField(max_length=255) # journal paper htmlid
+
+    def get_submit_day(self):
+        return self.date_sub.date()
+
+    def get_model(self):
+        model = self.dataset_set.all()
+        if model:
+            return self.dataset_set.all()[0].model
+        else:
+            return None
+
+    def get_phenotype(self):
+        model = self.dataset_set.all()
+        if model:
+            return self.dataset_set.all()[0].phenotype
+        else:
+            return None
+
+    def get_paradigm(self):
+        model = self.dataset_set.all()
+        if model:
+            return self.dataset_set.all()[0].paradigm
+        else:
+            return None
+
+    def get_number_pub_genes(self):
+        return len(self.iniagene_set.all())
+
+class BrainRegion(models.Model):
+    '''
+    Some regions have special relationships to each other and can be grouped in searching.  We want to represent that
+    here.  Only when "is_super_group" is checked would the grouped_regions matter.
+    For example, if we have Amygdala can be Amygdala, Basolateral AMygdala, and Central Amygdala.
+    '''
+
+    name = models.CharField(unique=True, max_length=255)
+    abbreviation = models.CharField(unique=True, max_length=255)
+    sub_groups = models.ManyToManyField("self", blank=True)
+    is_super_group = models.BooleanField("self", blank=True, default=False)
+
+    def get_group_and_subgroup(self):
+        '''Always returns a list.'''
+        groups = [self]
+        if self.is_super_group:
+            groups.extend(self.sub_groups.all())
+        return groups
 
 
 class Dataset(models.Model):
@@ -55,10 +102,16 @@ class Dataset(models.Model):
     model = models.CharField(max_length=255)
     phenotype = models.CharField(max_length=255)
     species = models.CharField(max_length=255, choices=SpeciesType.SPECIES_CHOICES)
-    brain_region = models.CharField(max_length=255)
+    brain_region = models.ForeignKey(BrainRegion, on_delete=models.PROTECT)
     paradigm = models.CharField(max_length=255)
     paradigm_duration = models.CharField(max_length=255)
     alcohol = models.BooleanField()
+    official_dataset_name = models.CharField(max_length=255, unique=True)
+
+    def get_number_genes(self):
+        return len(self.iniagene_set.all())
+
+
 
 
 class Homologene(models.Model):
