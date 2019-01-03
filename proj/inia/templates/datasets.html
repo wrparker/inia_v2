@@ -33,7 +33,7 @@
         Paradigm: {{ pub.get_paradigm }}<br>
         Datasets from this publication:
         {% for ds in pub.dataset_set.all %}
-            <a href="#"><small>{{ ds.official_dataset_name }} ({{ ds.get_number_genes }})</a></small>
+            <a href="#"><small>{{ ds.name }} ({{ ds.get_number_genes }})</a></small>
                 {% if not forloop.last %}, {% endif %}
         {% endfor  %}
         <br><br>
@@ -45,7 +45,7 @@
         <strong><a href="#">{{info.name }} ({{ info.total }})</a></strong><br>
         {% for ds in info.datasets%}
             <a href="#">
-                <small>{{ ds.official_dataset_name }} ({{ ds.get_number_genes }})</small>
+                <small>{{ ds.name }} ({{ ds.get_number_genes }})</small>
             </a>{% if not forloop.last %}, {% endif %}
 
         {%  endfor %}

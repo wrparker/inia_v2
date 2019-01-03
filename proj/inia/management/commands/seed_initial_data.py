@@ -125,7 +125,7 @@ class Command(BaseCommand):
                     normalized_treatment = 'NONE'
                 Dataset.objects.create(
                     legacy_id=row['legacy_id'],
-                    name=row['name'].strip('"'),
+                    name=official_dataset_name,
                     treatment=row['treatment_type'].strip('"').upper(),
                     publication=related_pub,
                     microarray=datasetInfo[str(row['legacy_id'])]['microarray'],
@@ -136,7 +136,6 @@ class Command(BaseCommand):
                     paradigm=datasetInfo[str(row['legacy_id'])]['paradigm'],
                     paradigm_duration=datasetInfo[str(row['legacy_id'])]['paradigm_duration'],
                     alcohol=datasetInfo[str(row['legacy_id'])]['alcohol'],
-                    official_dataset_name=official_dataset_name
                 )
         else:
             _LOG.info("Dataset entries exist... skipping.")
@@ -178,7 +177,6 @@ class Command(BaseCommand):
 
             for values in geneValueList:
                 #Formatting done now lets create this stuff.
-                relevant_pub = Publication.objects.get(legacy_id=values['pub'])
                 relevant_dataset = Dataset.objects.get(legacy_id=values['dataset'])
 
                 newGene = IniaGene.objects.create(
@@ -189,7 +187,6 @@ class Command(BaseCommand):
                     p_value=values['pvalue'],
                     fdr=float(values['fdr']),
                     direction=values['direction'],
-                    publication=relevant_pub,
                     dataset=relevant_dataset,
                 )
 

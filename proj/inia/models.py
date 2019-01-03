@@ -60,7 +60,11 @@ class Publication(models.Model):
             return None
 
     def get_number_pub_genes(self):
-        return len(self.iniagene_set.all())
+        count = 0
+        for ds in self.dataset_set.all():
+            count += ds.get_number_genes()
+        return count
+
 
 class BrainRegion(models.Model):
     '''
@@ -98,7 +102,7 @@ class Dataset(models.Model):
     )
 
     legacy_id = models.IntegerField()
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255, unique=True)
     treatment = models.CharField(max_length=255, choices=TREATMENT_CHOICES)
     publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
     microarray = models.CharField(max_length=255)
@@ -109,7 +113,6 @@ class Dataset(models.Model):
     paradigm = models.CharField(max_length=255)
     paradigm_duration = models.CharField(max_length=255)
     alcohol = models.BooleanField()
-    official_dataset_name = models.CharField(max_length=255, unique=True)
 
     def get_number_genes(self):
         return len(self.iniagene_set.all())
@@ -153,7 +156,6 @@ class IniaGene(models.Model):  # Genes we do through experimentation
     p_value = models.FloatField(null=True, blank=True)  # stats
     fdr = models.FloatField()   # false discovery rate
     direction = models.CharField(max_length=255, choices=DIRECTION_CHOICES)
-    publication = models.ForeignKey(Publication, on_delete=models.PROTECT)
     dataset = models.ForeignKey(Dataset, on_delete=models.PROTECT)
     homologenes = models.ManyToManyField(Homologene)
     updated = models.DateTimeField(auto_now=True)

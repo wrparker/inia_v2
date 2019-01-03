@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% load inia_extras %}
+
+{% block content %}
+<h2><strong>SEARCH</strong></h2>
+    <br />
+    {% if error %}
+        <div class="search-error">
+            {{ error }}
+        </div>
+    {% endif %}
+    {% if not genes %}
+        Enter some values to search IT-GED.
+        {% else %}
+
+        <div class="pagination">
+            <span class="step-links">
+        {% if genes.has_previous %}
+            <a href="?{{ urlencode }}&page=1">&laquo; first</a>
+            <a href="?{{ urlencode }}&page={{ genes.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            <h3>Total results:{{ total_results }}</h3>
+            <br />Page {{ genes.number }} of {{ genes.paginator.num_pages }}.
+        </span>
+
+        {% if genes.has_next %}
+            <a href="?{{ urlencode }}&page={{ genes.next_page_number }}">next</a>
+            <a href="?{{ urlencode }}&page={{ genes.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+
+        <table class="table">
+        <th>Gene Symbol</th>
+        <th>Gene Name</th>
+        <th>Aliases</th>
+        <th>Gene Expression Platform</th>
+        <th>Probe/Gene ID</th>
+        <th>Species</th>
+        <th>Ethanol/Treatment</th>
+        <th>Brain region/Cell type</th>
+        <th>p-value</th>
+        <th>direction of change</th>
+        <th>Est FDR</th>
+        <th>Dataset</th>
+        <th>Reference</th>
+        {% for gene in genes %}
+            <tr>
+            <td>{{gene.gene_symbol}}</td>
+            <td>{{gene.gene_name}}</td>
+            <td>
+                {%  for alias in gene.genealiases_set.all %}
+                    {{ alias.symbol }},
+                    {% endfor %}
+            </td>
+            <td>{{ gene.dataset.microarray }}</td>
+            <td>{{ gene.uniqueID }}</td>
+            <td>{{ gene.dataset.species }}</td>
+            <td>{{ gene.dataset.treatment }}</td>
+            <td>{{ gene.dataset.brain_region.name}}</td>
+            <td>{{ gene.p_value }}</td>
+            <td>{{ gene.direction }}</td>
+            <td>{{ gene.fdr }}</td>
+            <td>{{ gene.dataset.name }}</td>
+            <td>{{ gene.dataset.publication.get_short_name }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+<br /><br/>
+{% include '_wildcard_box.html' %}
+{%  endblock %}

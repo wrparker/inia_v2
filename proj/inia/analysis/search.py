@@ -45,9 +45,9 @@ def base_gene_search(search, exclude_name=False):
                     Q(gene_symbol__iexact=term) |
                     Q(homologenes__gene_symbol__iexact=term) |
                     Q(genealiases__symbol__iexact=term)
-            )
-            if not exclude_name:
-                results = results | IniaGene.objects.filter(Q(gene_name__icontains=term))
+                )
+                if not exclude_name:
+                    results = results | IniaGene.objects.filter(Q(gene_name__icontains=term))
         # Regex Matches...
         elif bool(set(_WEBAPP_REGEX_SYMBOLS.keys() & [c for c in term])):  # Assume numbers are not keys bc regex.
             for regex_conversion in _WEBAPP_REGEX_SYMBOLS.keys():
@@ -70,8 +70,8 @@ def base_gene_search(search, exclude_name=False):
                     Q(homologenes__gene_symbol__icontains=term) |
                     Q(genealiases__symbol__icontains=term)
                 )
-            if not exclude_name:
-                results = results | IniaGene.objects.filter(Q(gene_name__icontains=term))
+                if not exclude_name:
+                    results = results | IniaGene.objects.filter(Q(gene_name__icontains=term))
 
     results = results.distinct()
     return results

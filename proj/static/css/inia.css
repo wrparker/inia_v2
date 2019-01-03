@@ -24,6 +24,12 @@ body{
     padding-top:10px;
 }
 
+.sidebar-text-reg{
+    color:#FFFFFF;
+    font-size:0.95em;
+}
+
+
 #content {
     padding-top:10px;
 }
@@ -183,13 +189,26 @@ footer{
 
 
 /* Common/shared classes... */
-.abbreviation-info{
+.info-box{
     border: 1px solid #1A5991;
     background: #50ACD3;
     padding-left:3px;
     padding-right:3px;
     padding-bottom: 0;
-    line-height:0.9em;
+    line-height:1.2em;
     margin-bottom:0px;
     margin-top:5px;
+}
+
+.wildcards{
+    max-width:400px !important;
+}
+
+
+/* Search stuff */
+.search-error{
+    font-weight:bold;
+    color:red;
+    border: 1px solid red;
+    background-color:pink;
 }

@@ -27,5 +27,6 @@ urlpatterns = [
     re_path('^contact/$', views.contact, name='contact'),
     re_path('^links/$', views.links, name='links'),
     re_path('^help/$', views.help_home, name='help_home'),
+    re_path('^search/$', views.search, name='search'),
 
 ]
