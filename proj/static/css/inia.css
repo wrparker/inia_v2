@@ -211,4 +211,10 @@ footer{
     color:red;
     border: 1px solid red;
     background-color:pink;
+    width:auto;
+}
+
+table{
+    display: flex !important;
+    font-size:0.8em !important;
 }

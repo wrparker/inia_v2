@@ -5,15 +5,26 @@
 {% block content %}
 <h2><strong>SEARCH</strong></h2>
     <br />
-    {% if error %}
+    <form action="{% url 'inia:search' %}" method="get" />
+        <input type="hidden" name="output" value="html" />
+        <input type="text" name="gene" value="{{ old_search }}" placeholder="Search For Gene..." required /><br/>
+    Filters:
+    <br/>
+    <button type="submit">Search <i class="fa fa-search"></i></button> <br />
+    </form>
+    {% if errors %}
         <div class="search-error">
-            {{ error }}
+            <ul>
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
         </div>
     {% endif %}
     {% if not genes %}
         Enter some values to search IT-GED.
         {% else %}
-
+        Dataset Summary | View Gene Network | Overrepresentation Analysis | Download CSV
         <div class="pagination">
             <span class="step-links">
         {% if genes.has_previous %}
@@ -22,7 +33,6 @@
         {% endif %}
 
         <span class="current">
-            <h3>Total results:{{ total_results }}</h3>
             <br />Page {{ genes.number }} of {{ genes.paginator.num_pages }}.
         </span>
 
@@ -30,32 +40,36 @@
             <a href="?{{ urlencode }}&page={{ genes.next_page_number }}">next</a>
             <a href="?{{ urlencode }}&page={{ genes.paginator.num_pages }}">last &raquo;</a>
         {% endif %}
+        <h3>Total results:{{ total_results }}</h3>
     </span>
 </div>
 
-
-        <table class="table">
-        <th>Gene Symbol</th>
-        <th>Gene Name</th>
-        <th>Aliases</th>
-        <th>Gene Expression Platform</th>
-        <th>Probe/Gene ID</th>
-        <th>Species</th>
-        <th>Ethanol/Treatment</th>
-        <th>Brain region/Cell type</th>
-        <th>p-value</th>
-        <th>direction of change</th>
-        <th>Est FDR</th>
-        <th>Dataset</th>
-        <th>Reference</th>
+<div class="table-responsive">
+        <table class="table search-table">
+        <tr>
+        <td>Gene Symbol</td>
+        <td>Gene Name</td>
+        <td>Aliases</td>
+        <td>Gene Expression Platform</td>
+        <td>Probe/Gene ID</td>
+        <td>Species</td>
+        <td>Ethanol/Treatment</td>
+        <td>Brain region/Cell type</td>
+        <td>P-value</td>
+        <td>Direction of Change</td>
+        <td>Est FDR</td>
+        <td>Dataset</td>
+        <td>Reference</td>
+        </tr>
         {% for gene in genes %}
             <tr>
-            <td>{{gene.gene_symbol}}</td>
+            <td> {% if not gene.gene_symbol %} - {% else %}{{gene.gene_symbol}}{% endif %}</td>
             <td>{{gene.gene_name}}</td>
-            <td>
+            <td>{% if not gene.genealiases_set.all %} - {% else %}
                 {%  for alias in gene.genealiases_set.all %}
                     {{ alias.symbol }},
                     {% endfor %}
+            {% endif %}
             </td>
             <td>{{ gene.dataset.microarray }}</td>
             <td>{{ gene.uniqueID }}</td>
@@ -63,14 +77,38 @@
             <td>{{ gene.dataset.treatment }}</td>
             <td>{{ gene.dataset.brain_region.name}}</td>
             <td>{{ gene.p_value }}</td>
-            <td>{{ gene.direction }}</td>
+            <td>
+                {% direction_tooltip gene.direction %}
+            </td>
             <td>{{ gene.fdr }}</td>
-            <td>{{ gene.dataset.name }}</td>
-            <td>{{ gene.dataset.publication.get_short_name }}</td>
+            <td>
+                <div rel='tooltip' data-original-title='<strong>{{ gene.dataset.name }}</strong><br /><strong>Alcohol on board</strong>: {{gene.dataset.alcohol|yesno:"YES,NO"}}<br/><strong>INIA Model</strong>: {{gene.dataset.model}}<br/><strong>Phenotype</strong>: {{ gene.dataset.phenotype }}<br/><strong>Paradigm</strong>: {{ gene.dataset.paradigm }}<br/><strong>Brain Region</strong>: {{ gene.dataset.brain_region.name }} ({{gene.dataset.brain_region.abbreviation }})<br/>'>
+                <a href="{% url 'inia:search' %}?dataset={{ gene.dataset.name }}&output=html" />
+                    {{ gene.dataset.name }}
+                </a>
+                </div>
+
+            </td>
+                <td>
+                    <div rel='tooltip' data-original-title='<strong>{{ gene.dataset.publication.htmlid }}</strong><br /><strong>Title</strong>: {{ gene.dataset.publication.title }}<br/><strong>Author</strong>: {{gene.dataset.publication.get_primary_author}} et al<br/><strong>Journal</strong>: {{ gene.dataset.publication.journal }}<br/><strong>Date</strong>: {{ gene.dataset.publication.get_submit_day }}<br/>'>
+                        <a href="{% url 'inia:datasets_home' %}" />
+                        {{ gene.dataset.publication.get_short_name }}
+                        </a>
+                    </div>
+
+
+                </td>
             </tr>
         {% endfor %}
         </table>
+</div>
     {% endif %}
 <br /><br/>
 {% include '_wildcard_box.html' %}
 {%  endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    $("[rel=tooltip]").tooltip({html:true});
+</script>
+{% endblock %}

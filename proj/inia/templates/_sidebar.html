@@ -12,8 +12,9 @@
                 <small>- Search for multiple genes at once</small> <br />
                 <small>- Wildcards and quotes</small> </p>
             <form method="get" action="{% url 'inia:search' %}">
-                <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'"/> <br/>
-                <button name="output" value="html" type="submit">Search Database <i class="fa fa-search"></i></button>
+                <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="" required/> <br/>
+                <button name="output" value="html" type="submit">Quick Search Database <i class="fa fa-search"></i></button>
+
 
             </form>
         </ul>

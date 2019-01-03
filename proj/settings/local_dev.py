@@ -5,7 +5,7 @@ Settings that overwrite settings in __init__.py in development mode.
 import sys
 globals().update(vars(sys.modules["settings"]))
 
-
+CACHE_MIDDLEWARE_SECONDS = 0 # Really just prevents us form caching in dev environment.
 
 # SQLite, uncomment to use this instead of mysql.
 '''

@@ -2,7 +2,7 @@ import re
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django.utils.html import strip_tags
-from inia.models import IniaGene
+from inia.models import IniaGene, Dataset, BrainRegion, Publication
 
 
 _WEBAPP_REGEX_SYMBOLS = {'*': '.*', # matches zero or more characters
@@ -40,6 +40,17 @@ def base_gene_search(search, exclude_name=False):
                     Q(uniqueID=term) |
                     Q(homologenes__homologene_group_id=term)
                 )
+            #regex exact match:
+            elif bool(set(_WEBAPP_REGEX_SYMBOLS.keys() & [c for c in term])):
+                for regex_conversion in _WEBAPP_REGEX_SYMBOLS.keys():
+                    term = term.replace(regex_conversion, _WEBAPP_REGEX_SYMBOLS[regex_conversion])
+                results = results | IniaGene.objects.filter(
+                    Q(gene_symbol__iregex=term) |
+                    Q(homologenes__gene_symbol__iregex=term) |
+                    Q(genealiases__symbol__iregex=term)
+                )
+                if not exclude_name:
+                    results = results | IniaGene.objects.filter(Q(gene_name__iregex='.*' + term + '.*'))
             else:
                 results = results | IniaGene.objects.filter(
                     Q(gene_symbol__iexact=term) |
@@ -57,6 +68,9 @@ def base_gene_search(search, exclude_name=False):
                 Q(homologenes__gene_symbol__iregex=term) |
                 Q(genealiases__symbol__iregex=term)
             )
+            if not exclude_name:
+                results = results | IniaGene.objects.filter(Q(gene_name__iregex='.*' + term + '.*'))
+
         # Plain matches (basically *term*).
         else:
             if term.isdigit():
@@ -75,3 +89,137 @@ def base_gene_search(search, exclude_name=False):
 
     results = results.distinct()
     return results
+
+
+class LegacyAPIHelper:
+    ALLOWED_API_PARAMETERS = [
+        'output', # NON ADV FILTER VAL
+        'gene',   # NON ADV FILTER VAL
+        'page',   # NON ADV FILTER VAL allowed for pagination
+        'excludeName',# NON ADV FILTER VAL
+        'direction',
+        'alcohol',
+        'microarray',
+        'model',
+        'phenotype',
+        'species',
+        'region',
+        'paradigm',
+        'publication',
+        'dataset'
+    ]
+    ADVANCED_FILTER_VALUES = ALLOWED_API_PARAMETERS[4:]  # just slice above array
+    @staticmethod
+    def check_for_valid_value(api_parameter, api_value):
+        unique_values = LegacyAPIHelper.unqiue_values_fn_map(api_parameter)()
+        if api_value.lower() in unique_values:
+            return True
+        else:
+            return False
+    @staticmethod
+    def perform_filter(api_parameter, queryset, api_value):
+        return LegacyAPIHelper.filter_fn_map(api_parameter, queryset)(api_value)
+
+    @staticmethod
+    def filter_fn_map(api_param, iniagene_queryset):
+        def get_microarray(needle):
+            return iniagene_queryset.filter(dataset__microarray__iexact=needle)
+
+        def get_alcohol(needle):
+            needle = needle.lower() in ['true', 'yes', '1']
+            return iniagene_queryset.filter(dataset__alcohol=needle)
+
+        def get_direction(needle):
+            return iniagene_queryset.filter(direction__iexact=needle)
+
+        def get_model(needle):
+            return iniagene_queryset.filter(dataset__model=needle)
+
+        def get_phenotype(needle):
+            return iniagene_queryset.filter(dataset__phenotype=needle)
+
+        def get_species(needle):
+            return iniagene_queryset.filter(dataset__species=needle)
+
+        def get_brain_region(needle):
+            region = BrainRegion.objects.get(Q(name=needle) | Q(abbreviation=needle))
+            if region.is_super_group:
+                return iniagene_queryset.filter(Q(dataset__brain_region=region) |
+                                               Q(dataset__brain_region__in=region.sub_groups.all()))
+            else:
+                return iniagene_queryset.filter(Q(dataset__brain_region=region))
+
+        def get_paradigm(needle):
+            return iniagene_queryset.filter(dataset__paradigm__iexact=needle)
+
+        def get_publication(needle):
+            return iniagene_queryset.filter(dataset__publication__htmlid__iexact=needle)
+
+        def get_dataset(needle):
+            return iniagene_queryset.filter(dataset__name=needle)
+
+        filter_map = {
+            'microarray': get_microarray,
+            'alcohol': get_alcohol,
+            'direction': get_direction,
+            'model': get_model,
+            'phenotype': get_phenotype,
+            'species': get_species,
+            'region': get_brain_region,
+            'paradigm': get_paradigm,
+            'publication': get_publication,
+            'dataset': get_dataset,
+        }
+        return filter_map[api_param]
+
+    @staticmethod
+    def unqiue_values_fn_map(value):
+        def get_microarray():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('microarray').distinct()]
+
+        def get_alcohol():
+            return ['YES', 'NO']
+
+        def get_direction():
+            return [choice[0].lower() for choice in IniaGene.DIRECTION_CHOICES]
+
+        def get_model():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('model').distinct()]
+
+        def get_phenotype():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('phenotype').distinct()]
+
+        def get_species():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('species').distinct()]
+
+        def get_brain_region():
+            allowed = [choice[0].lower() for choice in BrainRegion.objects.values_list('name').distinct()]
+            allowed.extend([choice[0].lower() for choice in BrainRegion.objects.values_list('abbreviation').distinct()])
+            return allowed
+
+        def get_paradigm():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('paradigm').distinct()]
+
+        def get_publication():
+            return [choice[0].lower() for choice in Publication.objects.values_list('htmlid').distinct()]
+
+        def get_dataset():
+            return [choice[0].lower() for choice in Dataset.objects.values_list('name').distinct()]
+        unique_values = {
+            'microarray': get_microarray,
+            'alcohol': get_alcohol,
+            'direction': get_direction,
+            'model': get_model,
+            'phenotype': get_phenotype,
+            'species': get_species,
+            'region': get_brain_region,
+            'paradigm': get_paradigm,
+            'publication': get_publication,
+            'dataset': get_dataset,
+        }
+        return unique_values[value]
+
+
+
+
+

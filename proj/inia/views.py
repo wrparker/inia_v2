@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
-from .analysis.search import base_gene_search
+from .analysis.search import base_gene_search, LegacyAPIHelper
 
 import logging
 
@@ -55,30 +55,15 @@ def datasets(request):
 # This should ideally be refactored out into a proper API, but we need to provide legacy support...
 # THis is kind of ugly as is...
 def search(request):
-    ''' Regex Values are allowed... separated by pipe?'''
-    result = {}
+    ''' Regex Values are allowed... separated by pipe?... it doesn't seem to work on normal'''
     output = request.GET.get('output', '')
-    api_parameters = ['output',
-                      'gene',
-                      'direction',
-                      'excludeName',
-                      'alcohol',
-                      'microarray',
-                      'model',
-                      'phenotype',
-                      'species',
-                      'region',
-                      'paradigm',
-                      'publication',
-                      'page' #allowed for pagination
-                       ]
-    _err_msg = 'Unexpected input for {}. You gave {}. ALLOWED: {}'
-    _allowed_boolean_values = ['true', 'false', 'no', 'yes', '1', '0']
-    _true_boolean_values = ['true', 'yes', '1']
+    output = output.lower()
+    _err_msg = 'API Error: Parmeter: {}, Value: {}, Expected: {}'
+    errors = []
 
     for param in request.GET:
-        if param not in api_parameters:
-            return render(request, 'search.html', {'error': 'Unexpected parameter given: {}'.format(param)})
+        if param not in LegacyAPIHelper.ALLOWED_API_PARAMETERS:
+            errors.append('Unexpected parameter given: {}={}'.format(param, request.GET.get(param)))
 
     gene_param = request.GET.get('gene', None)
     if gene_param:
@@ -87,140 +72,33 @@ def search(request):
     else:
         # is there a param?
         genes = False
-        for param in api_parameters:
+        for param in LegacyAPIHelper.ADVANCED_FILTER_VALUES:
             if request.GET.get(param, None):
                 genes = True
         if genes:
             genes = IniaGene.objects.all()
     if genes:
-        # Microarray filter
-        microarray = request.GET.get('microarray', None)
-        if microarray:
-            microarray = unquote(microarray.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('microarray').distinct()]
-            if microarray in allowed_choices:
-                genes = genes.filter(dataset__microarray__iexact=microarray)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('microarray', microarray,
-                                                        ', '.join(i.title() for i in allowed_choices))})
-        # Alcohol filter
-        alcohol = (request.GET.get('alcohol', None))
-        if alcohol:
-            alcohol = unquote(alcohol.lower())
-            allowed_choices = _allowed_boolean_values
-            # Accept True/False/No/Yes otherwise Error
-            if alcohol in allowed_choices:
-                alcohol = alcohol in _true_boolean_values # get bool
-                genes = genes.filter(dataset__alcohol=alcohol)
-            else:
-                return render(request, 'search.html',
-                       {'error': _err_msg.format('alcohol', alcohol, ', '.join(allowed_choices))})
-
-        # Direction Filter
-        direction = request.GET.get('direction', None)
-        if direction:
-            direction = unquote(direction.lower())
-            allowed_choices = [choice[0].lower() for choice in IniaGene.DIRECTION_CHOICES]
-            if direction in allowed_choices:
-                genes = genes.filter(direction__iexact=direction)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('direction', direction, ', '.join(i for i in allowed_choices))})
-        # Model Filter
-        model = request.GET.get('model', None)
-        if model:
-            model = unquote(model.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('model').distinct()]
-            if model in allowed_choices:
-                genes = genes.filter(dataset__model=model)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('model', model, ', '.join(i for i in allowed_choices))})
-
-        # phenotype filter
-        phenotype = request.GET.get('phenotype', None)
-        if phenotype:
-            phenotype = unquote(phenotype.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('phenotype').distinct()]
-            if phenotype in allowed_choices:
-                genes = genes.filter(dataset__phenotype=phenotype)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('phenotype', phenotype, ', '.join(i for i in allowed_choices))})
-
-        # species filter
-        species = request.GET.get('species', None)
-        if species:
-            species = unquote(species.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('species').distinct()]
-            if species in allowed_choices:
-                genes = genes.filter(dataset__species=species)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('species', species, ', '.join(i for i in allowed_choices))})
-
-        # brain_region filter
-        brain_region = request.GET.get('region', None)
-        if brain_region:
-            brain_region = unquote(brain_region.lower())
-            allowed_choices = [choice[0].lower() for choice in BrainRegion.objects.values_list('name').distinct()]
-            allowed_choices.extend([choice[0].lower() for choice in BrainRegion.objects.values_list('abbreviation').distinct()])
-            if brain_region in allowed_choices:
-                br = BrainRegion.objects.get(Q(name=brain_region)| Q(abbreviation=brain_region))
-                if br.is_super_group:
-                    genes = genes.filter(Q(dataset__brain_region=br) | Q(dataset__brain_region__in=br.sub_groups.all()))
+        for api_param in LegacyAPIHelper.ADVANCED_FILTER_VALUES:
+            value = request.GET.get(api_param, None)
+            if api_param in request.GET and value:
+                if LegacyAPIHelper.check_for_valid_value(api_param, value):
+                    genes = LegacyAPIHelper.perform_filter(api_param, genes, value)
                 else:
-                    genes = genes.filter(dataset__brain_region=br)
+                    genes = IniaGene.objects.none()
+                    errors.append(_err_msg)
 
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('brain_region', brain_region,
-                                                        ', '.join(i for i in allowed_choices))})
-        #Alcohol Paradigm filter
-        paradigm = request.GET.get('paradigm', None)
-        if paradigm:
-            paradigm = unquote(paradigm.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('paradigm').distinct()]
-            if paradigm in allowed_choices:
-                genes = genes.filter(dataset__paradigm__iexact=paradigm)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('paradigm', paradigm, ', '.join(i for i in allowed_choices))})
-
-        #publication filter
-        publication = request.GET.get('publication', None)
-        if publication:
-            publication = unquote(publication.lower())
-            allowed_choices = [choice[0].lower() for choice in Publication.objects.values_list('htmlid').distinct()]
-            if publication in allowed_choices:
-                genes = genes.filter(dataset__publication__htmlid__iexact=publication)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('publication', publication, ', '.join(i for i in allowed_choices))})
-
-        #Datset Filter
-        dataset = request.GET.get('dataset', None)
-        if dataset:
-            dataset = unquote(dataset.lower())
-            allowed_choices = [choice[0].lower() for choice in Dataset.objects.values_list('name').distinct()]
-            if dataset in allowed_choices:
-                genes = genes.filter(dataset__name=dataset)
-            else:
-                return render(request, 'search.html',
-                              {'error': _err_msg.format('dataset', dataset, ', '.join(i for i in allowed_choices))})
+        genes = genes.order_by('gene_symbol') if genes else IniaGene.objects.none()
         total_results = len(genes)
         paginator = Paginator(genes, 100)
         page = request.GET.get('page', 1)
-        urlencode = request.GET.urlencode().replace('page='+str(page), '')
+        urlencode = request.GET.urlencode().replace('page='+str(page), '').replace('output=html', '')
         genes = paginator.get_page(page)
-        return render(request, 'search.html', {'genes': genes,
-                                               'urlencode': urlencode,
-                                               'total_results': total_results})
-
-
-
-
+        if output == 'html':
+            return render(request, 'search.html', {'genes': genes,
+                                                   'urlencode': urlencode,
+                                                   'total_results': total_results,
+                                                   'errors': errors
+                                                   #'old_search': unquote(request.GET.get('gene', None))
+                                                   })
     else:
-        return render(request, 'search.html', {'error':'No query given.'})
-
+        return render(request, 'search.html', {'errors': errors})
