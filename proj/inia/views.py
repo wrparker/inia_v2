@@ -7,6 +7,8 @@ from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 
+from common import remove_from_url
+
 import logging
 
 _LOG = logging.getLogger('application.'+ __name__)
@@ -58,7 +60,7 @@ def search(request):
     ''' Regex Values are allowed... separated by pipe?... it doesn't seem to work on normal'''
     output = request.GET.get('output', '')
     output = output.lower()
-    _err_msg = 'API Error: Parmeter: {}, Value: {}, Expected: {}'
+    _err_msg = 'API Error: Parmeter: {} -- Value Received: {} -- Expected: {}'
     errors = []
 
     for param in request.GET:
@@ -72,26 +74,28 @@ def search(request):
     else:
         # is there a param?
         genes = False
-        for param in LegacyAPIHelper.ADVANCED_FILTER_VALUES:
+        for param in LegacyAPIHelper.ADVANCED_FILTER_OPTIONS:
             if request.GET.get(param, None):
                 genes = True
         if genes:
             genes = IniaGene.objects.all()
     if genes:
-        for api_param in LegacyAPIHelper.ADVANCED_FILTER_VALUES:
+        for api_param in LegacyAPIHelper.ADVANCED_FILTER_OPTIONS:
             value = request.GET.get(api_param, None)
             if api_param in request.GET and value:
-                if LegacyAPIHelper.check_for_valid_value(api_param, value):
+                valid, unique_vals = LegacyAPIHelper.check_and_return_valid_values(api_param, value)
+                if valid:
                     genes = LegacyAPIHelper.perform_filter(api_param, genes, value)
                 else:
                     genes = IniaGene.objects.none()
-                    errors.append(_err_msg)
+                    errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
 
         genes = genes.order_by('gene_symbol') if genes else IniaGene.objects.none()
         total_results = len(genes)
         paginator = Paginator(genes, 100)
         page = request.GET.get('page', 1)
-        urlencode = request.GET.urlencode().replace('page='+str(page), '').replace('output=html', '')
+        urlencode = request.GET.urlencode()
+        # TODO: need to remove page and output form urlencode... well page for regular stuff and output for csv link
         genes = paginator.get_page(page)
         if output == 'html':
             return render(request, 'search.html', {'genes': genes,

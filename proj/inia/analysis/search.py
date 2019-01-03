@@ -108,14 +108,14 @@ class LegacyAPIHelper:
         'publication',
         'dataset'
     ]
-    ADVANCED_FILTER_VALUES = ALLOWED_API_PARAMETERS[4:]  # just slice above array
+    ADVANCED_FILTER_OPTIONS = ALLOWED_API_PARAMETERS[4:]  # just slice above array
     @staticmethod
-    def check_for_valid_value(api_parameter, api_value):
+    def check_and_return_valid_values(api_parameter, api_value):
         unique_values = LegacyAPIHelper.unqiue_values_fn_map(api_parameter)()
         if api_value.lower() in unique_values:
-            return True
+            return True, unique_values
         else:
-            return False
+            return False, unique_values
     @staticmethod
     def perform_filter(api_parameter, queryset, api_value):
         return LegacyAPIHelper.filter_fn_map(api_parameter, queryset)(api_value)
