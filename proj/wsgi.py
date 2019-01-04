@@ -10,7 +10,7 @@ import os
 from django.core.wsgi import get_wsgi_application
 
 sys.path.append("/var/www/inia_v2/proj")
-sys.path.append('/var/www/inia_v2/.atsdi_django_env/lib/python3.6/site-packages')
+sys.path.append('/var/www/inia_v2/.virutalenv/lib/python3.6/site-packages')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
