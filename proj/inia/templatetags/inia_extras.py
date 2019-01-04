@@ -11,9 +11,9 @@ def get_abbreviations(brain_regions):
 @register.simple_tag(name='direction_tooltip')
 def regulation_tooltip(direction):
     if direction.lower() == 'down':
-        return mark_safe("<div style='text-decoration:underline;' rel='tooltip' data-original-title='<strong>Direction: DOWN</strong><br />Downregulated in alcohol-preferring animals, human alcoholics, or after alcohol'>"+direction+"</div>")
+        return mark_safe("<td id='tooltip' rel='tooltip' data-placement='left' data-original-title='<strong>Direction: DOWN</strong><br />Downregulated in alcohol-preferring animals, human alcoholics, or after alcohol'>"+direction+"</td>")
     elif direction.lower() == 'up':
-        return mark_safe("<div style='text-decoration:underline;' rel='tooltip' data-original-title='<strong>Direction: UP<br /></strong>Upregulated in alcohol-preferring animals, human alcoholics, or after alcohol.'>"+direction+"</div>")
+        return mark_safe("<td id='tooltip' rel='tooltip' data-placement='left' data-original-title='<strong>Direction: UP<br /></strong>Upregulated in alcohol-preferring animals, human alcoholics, or after alcohol.'>"+direction+"</td>")
 
 
 @register.simple_tag(name='exclude_name_form_checkbox')

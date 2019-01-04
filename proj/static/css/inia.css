@@ -195,7 +195,6 @@ footer{
     padding-left:3px;
     padding-right:3px;
     padding-bottom: 0;
-    line-height:1.2em;
     margin-bottom:0px;
     margin-top:5px;
 }
@@ -214,7 +213,28 @@ footer{
     width:auto;
 }
 
-table{
-    display: flex !important;
-    font-size:0.95em !important;
+.result-table{
+    display: flex !important
+}
+
+.result-table td{
+    border: #000000 solid 1px;
+    font-size:inherit;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-left:0.4em;
+    padding-right:0.4em;
+}
+.result-table .col-name{
+    font-weight:bold;
+}
+.result-table tr:nth-child(even){
+    background-color: #84BCD6 !important;
+}
+.result-table  tr:nth-child(odd){
+    background-color: #0092D6 !important;
+}
+
+#tooltip {
+    text-decoration: underline;
 }
