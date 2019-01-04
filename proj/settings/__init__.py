@@ -200,6 +200,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')  # proj/static/
                     ]
+STATIC_ROOT = STATICFILES_DIRS[0]
+
 
 # Google RECAPTCHA
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY', '')
