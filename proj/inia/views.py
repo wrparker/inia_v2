@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from urllib.parse import unquote
+from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -7,7 +7,6 @@ from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 
-from common import remove_from_url
 
 import logging
 
@@ -54,6 +53,7 @@ def datasets(request):
                                              'info_by_region': info_by_region,
                                              'brain_regions': brain_regions})
 
+
 # This should ideally be refactored out into a proper API, but we need to provide legacy support...
 # THis is kind of ugly as is...
 def search(request):
@@ -62,7 +62,6 @@ def search(request):
     output = output.lower()
     _err_msg = 'API Error: Parmeter: {} -- Value Received: {} -- Expected: {}'
     errors = []
-
     for param in request.GET:
         if param not in LegacyAPIHelper.ALLOWED_API_PARAMETERS:
             errors.append('Unexpected parameter given: {}={}'.format(param, request.GET.get(param)))
@@ -94,15 +93,17 @@ def search(request):
         total_results = len(genes)
         paginator = Paginator(genes, 100)
         page = request.GET.get('page', 1)
-        urlencode = request.GET.urlencode()
-        # TODO: need to remove page and output form urlencode... well page for regular stuff and output for csv link
+        query = request.GET.urlencode()
+        query = parse_qs(query)
+        query.pop('page', None)
+        query.pop('output', None)
+        query = urlencode(query, doseq=True)
         genes = paginator.get_page(page)
         if output == 'html':
             return render(request, 'search.html', {'genes': genes,
-                                                   'urlencode': urlencode,
+                                                   'urlencode': query,
                                                    'total_results': total_results,
                                                    'errors': errors
-                                                   #'old_search': unquote(request.GET.get('gene', None))
                                                    })
     else:
         return render(request, 'search.html', {'errors': errors})

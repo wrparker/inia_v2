@@ -5,12 +5,14 @@
 {% block content %}
 <h2><strong>SEARCH</strong></h2>
     <br />
-    <form action="{% url 'inia:search' %}" method="get" />
+    <form id="search_form" action="{% url 'inia:search' %}" method="get" />
         <input type="hidden" name="output" value="html" />
-        <input type="text" name="gene" value="{{ old_search }}" placeholder="Search For Gene..." required /><br/>
+        <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" />
+        {% exclude_name_form_checkbox request %} <br />
     Filters:
+    {% advanced_gene_search_filters_as_table request %}
     <br/>
-    <button type="submit">Search <i class="fa fa-search"></i></button> <br />
+    <button type="submit" id="search-page-search-button">Search <i class="fa fa-search"></i></button> <br />
     </form>
     {% if errors %}
         <div class="search-error">
@@ -24,7 +26,7 @@
     {% if not genes %}
         Enter some values to search IT-GED.
         {% else %}
-        Dataset Summary | View Gene Network | Overrepresentation Analysis | <a href="{{ urlencode }}">Download CSV</a>
+        Dataset Summary | View Gene Network | Overrepresentation Analysis | <a href="?{{ urlencode }}">Download CSV</a>
         <div class="pagination">
             <span class="step-links">
         {% if genes.has_previous %}
@@ -37,8 +39,8 @@
         </span>
 
         {% if genes.has_next %}
-            <a href="?{{ urlencode }}&page={{ genes.next_page_number }}">next</a>
-            <a href="?{{ urlencode }}&page={{ genes.paginator.num_pages }}">last &raquo;</a>
+            <a href="?{{ urlencode }}&page={{ genes.next_page_number }}&output=html">next</a>
+            <a href="?{{ urlencode }}&page={{ genes.paginator.num_pages }}&output=html">last &raquo;</a>
         {% endif %}
         <h3>Total results:{{ total_results }}</h3>
     </span>
@@ -110,5 +112,19 @@
 {% block extrajs %}
 <script type="text/javascript">
     $("[rel=tooltip]").tooltip({html:true});
+
+    $("#search-page-search-button").click(function(){
+        $("select").each(function(){
+            if($(this).val() == '') {
+                $(this).remove();
+            }
+        });
+        $("input").each(function(){
+            if($(this).val() == '') {
+                $(this).remove();
+            }
+        });
+        $("#form_id").submit();
+    });
 </script>
 {% endblock %}
