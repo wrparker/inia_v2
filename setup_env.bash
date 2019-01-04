@@ -16,7 +16,7 @@ source ./.virtualenv/bin/activate
 echo "Checking pip"
 which pip
 echo "Installing Requirements"
-pip3 install -r requirements.frozen --index https://pypi.org/simple
+pip3 install -r requirements.txt --index https://pypi.org/simple
 echo "Performing Migrations"
 python proj/manage.py migrate
 deactivate
