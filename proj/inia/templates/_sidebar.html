@@ -13,7 +13,7 @@
                 <small>- Search for multiple genes at once</small> <br />
                 <small>- Wildcards and quotes</small> </p>
             <form method="get" action="{% url 'inia:search' %}">
-                <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value={{ request.GET.gene }} /> <br/>
+                <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" /> <br/>
                 <p class="sidebar-text-reg">{% exclude_name_form_checkbox request %}</p>
                 <button name="output" value="html" type="submit">Quick Search Database <i class="fa fa-search"></i></button>
             </form>

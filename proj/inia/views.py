@@ -88,7 +88,8 @@ def search(request):
                 else:
                     genes = IniaGene.objects.none()
                     errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
-        genes = genes.order_by('gene_symbol', nulls_last=True) if genes else IniaGene.objects.none()
+
+        genes = genes.order_by(F('gene_symbol').asc().nullslast()) if genes else IniaGene.objects.none()
         total_results = len(genes)
         paginator = Paginator(genes, 100)
         page = request.GET.get('page', 1)
