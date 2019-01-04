@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
-from django.db.models import Q
+from django.db.models import F, Q
 from django.core.paginator import Paginator
 from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
@@ -89,7 +89,7 @@ def search(request):
                     genes = IniaGene.objects.none()
                     errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
 
-        genes = genes.order_by(F('gene_symbol').asc().nullslast()) if genes else IniaGene.objects.none()
+        genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
         total_results = len(genes)
         paginator = Paginator(genes, 100)
         page = request.GET.get('page', 1)
