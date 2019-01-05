@@ -173,38 +173,38 @@ class LegacyAPIHelper:
         return filter_map[api_param]
 
     @staticmethod
-    def unqiue_values_fn_map(value):
+    def unqiue_values_fn_map(value, result_as_lower=True):
         def get_microarray():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('microarray').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('microarray').distinct()]
 
         def get_alcohol():
             return ['YES', 'NO']
 
         def get_direction():
-            return [choice[0].lower() for choice in IniaGene.DIRECTION_CHOICES]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in IniaGene.DIRECTION_CHOICES]
 
         def get_model():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('model').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('model').distinct()]
 
         def get_phenotype():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('phenotype').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('phenotype').distinct()]
 
         def get_species():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('species').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('species').distinct()]
 
         def get_brain_region():
-            allowed = [choice[0].lower() for choice in BrainRegion.objects.values_list('name').distinct()]
-            allowed.extend([choice[0].lower() for choice in BrainRegion.objects.values_list('abbreviation').distinct()])
+            allowed = [choice[0].lower() if result_as_lower else choice[0] for choice in BrainRegion.objects.values_list('name').distinct()]
+            allowed.extend([choice[0].lower() if result_as_lower else choice[0] for choice in BrainRegion.objects.values_list('abbreviation').distinct()])
             return allowed
 
         def get_paradigm():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('paradigm').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('paradigm').distinct()]
 
         def get_publication():
-            return [choice[0].lower() for choice in Publication.objects.values_list('htmlid').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Publication.objects.values_list('htmlid').distinct()]
 
         def get_dataset():
-            return [choice[0].lower() for choice in Dataset.objects.values_list('name').distinct()]
+            return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('name').distinct()]
         unique_values = {
             'microarray': get_microarray,
             'alcohol': get_alcohol,

@@ -29,25 +29,97 @@
             <!-- A grey horizontal navbar that becomes vertical on small screens -->
         {% include '_navbar.html' %}
         <div class="main_content">
-
             {% block content %}
             {% endblock %}
+
             <div class="content_disclaimer">
                 <strong>Please note</strong>: This site is still under construction.
             </div>
         </div>
-
+        <div class="loading_main loading">Loading results.... <i class="fa fa-spinner fa-spin"></i></div>
     </div>
 
 </div>
 
 
 
-    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-{% block extrajs %}
+<!-- JQuery for Web Search... -->
+<script type="text/javascript">
+  $("[rel=tooltip]").tooltip({html:true});
+
+    function submit_search(form){
+        $('.main_content').hide()
+
+        $(".loading").each(function(){
+            $(this).show()
+        });
+
+        $('.search_form').each(function(){
+          $(this).hide()
+        });
+        $(".adv-filter-select").each(function(){
+            if($(this).val() === '') {
+                $(this).remove();
+            }
+        });
+        $("input").each(function(){
+            if($(this).val() === '') {
+                $(this).remove();
+            }
+        });
+        form.submit();
+    }
+
+
+    $(".search-page-search-button").click(function(e){
+        e.preventDefault();
+        submit_search($(this.closest('form')));
+    });
+
+
+    $( ".adv-filter-select" ).change(function() {
+        submit_search($(this.closest('form')));
+    });
+    function submit_search(form){
+        $('.main_content').hide()
+
+        $(".loading").each(function(){
+            $(this).show()
+        });
+
+        $('.search_form').each(function(){
+          $(this).hide()
+        });
+        $(".adv-filter-select").each(function(){
+            if($(this).val() === '') {
+                $(this).remove();
+            }
+        });
+        $("input").each(function(){
+            if($(this).val() === '') {
+                $(this).remove();
+            }
+        });
+        form.submit();
+    }
+
+
+    $(".search-page-search-button").click(function(e){
+        e.preventDefault();
+        submit_search($(this.closest('form')));
+    });
+
+
+    $( ".adv-filter-select" ).change(function() {
+        submit_search($(this.closest('form')));
+    });
+</script>
+
+  {% block extrajs %}
 {% endblock %}
   </body>
 <footer>© 2011-2018 INIA/WCAAR</footer>

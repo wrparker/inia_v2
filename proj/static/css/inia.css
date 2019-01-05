@@ -6,7 +6,7 @@ body{
     max_width: 275px;
 }
 
-.main_content{
+.main_content, .loading_main{
     background-color: #84BCD6;
     border-radius:.25rem!important;
     padding:10px;
@@ -237,4 +237,16 @@ footer{
 
 #tooltip {
     text-decoration: underline;
+}
+
+.loading{
+    display: none;
+    font-size:2em;
+}
+.loading_side{
+    text-align:center;
+}
+
+#sidebar td{
+    color:white;
 }

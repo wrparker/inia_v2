@@ -29,37 +29,19 @@ def advanced_gene_search_filters_as_table(request):
     filter_html = ''
     filter_html += '<table>'
     for param in LegacyAPIHelper.ADVANCED_FILTER_OPTIONS:
-        options = LegacyAPIHelper.unqiue_values_fn_map(param)()
+        options = LegacyAPIHelper.unqiue_values_fn_map(param, result_as_lower=False)()
         param_value = request.GET.get(param, None)
         filter_html += '<tr>'
         filter_html += '<td>'
-        filter_html += param.title() + ':</td><td><select id="adv-filter-select" name='+param+'>'
+        filter_html += param.title() + ':</td><td><select class="adv-filter-select" name='+param+'>'
         filter_html += '<option value="">Any</option>'
         for option in options:
             selected = ''
-            if param_value and param_value.lower() == option:
+            if param_value and param_value.lower() == option.lower():  #redo case because we dont get results as lower
                 selected = 'selected'
-            filter_html += '<option value="{}" {}>{}</option>'.format(option, selected, option.title())
+            filter_html += '<option value="{}" {}>{}</option>'.format(option.lower(), selected, option)
         filter_html += '</select>'
         filter_html += '</td>'
         filter_html += '</tr>'
     filter_html += '</table>'
-    return mark_safe(filter_html)
-
-@register.simple_tag(name='advanced_gene_search_filters_as_p')
-def advanced_gene_search_filters_as_table(request, html_class=''):
-    filter_html = ''
-    for param in LegacyAPIHelper.ADVANCED_FILTER_OPTIONS:
-        options = LegacyAPIHelper.unqiue_values_fn_map(param)()
-        param_value = request.GET.get(param, None)
-        filter_html += '<p class={}>'.format(html_class)
-        filter_html += param.title() + ':</p><p class={}><select id="adv-filter-select" name='+param+'>'.format(html_class)
-        filter_html += '<option value="">Any</option>'
-        for option in options:
-            selected = ''
-            if param_value and param_value.lower() == option:
-                selected = 'selected'
-            filter_html += '<option value="{}" {}>{}</option>'.format(option, selected, option.title())
-        filter_html += '</select>'
-        filter_html += '</p>'
     return mark_safe(filter_html)

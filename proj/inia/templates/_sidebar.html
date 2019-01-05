@@ -6,17 +6,18 @@
                 <img src="{%static 'images/inia_logo.png' %}" />
             </a>
         </div>
-
         <ul class="list-unstyled components">
             <p class="sidebar-text-reg">Gene Symbol, Gene Name,
                 Unique ID, or HomoloGene ID: <br />
                 <small>- Search for multiple genes at once</small> <br />
                 <small>- Wildcards and quotes</small> </p>
-            <form method="get" action="{% url 'inia:search' %}">
+            <div class="loading loading_side"> <i class="fa fa-spinner fa-spin" style="color:white"></i></div>
+            <form class="search_form" method="get" action="{% url 'inia:search' %}">
+                <input type="hidden" name="output" value="html" />
                 <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" /> <br/>
                 <p class="sidebar-text-reg">{% exclude_name_form_checkbox request %}</p>
-                <button name="output" value="html" type="submit">Quick Search Database <i class="fa fa-search"></i></button>
+                {% advanced_gene_search_filters_as_table request %} <br />
+                <button type="submit" class="search-page-search-button">Perform Search <i class="fa fa-search"></i></button> <br />
             </form>
         </ul>
-
     </nav>

@@ -12,7 +12,7 @@
     Filters:
     {% advanced_gene_search_filters_as_table request %}
     <br/>
-    <button type="submit" id="search-page-search-button">Search <i class="fa fa-search"></i></button> <br />
+    <button type="submit" class="search-page-search-button">Search <i class="fa fa-search"></i></button> <br />
     </form>
     {% if errors %}
         <div class="search-error">
@@ -111,23 +111,3 @@
 <br /><br/>
 {% include '_wildcard_box.html' %}
 {%  endblock %}
-
-{% block extrajs %}
-<script type="text/javascript">
-    $("[rel=tooltip]").tooltip({html:true});
-
-    $("#search-page-search-button").click(function(){
-        $("select").each(function(){
-            if($(this).val() == '') {
-                $(this).remove();
-            }
-        });
-        $("input").each(function(){
-            if($(this).val() == '') {
-                $(this).remove();
-            }
-        });
-        $("#form_id").submit();
-    });
-</script>
-{% endblock %}
