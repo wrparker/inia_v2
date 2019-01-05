@@ -31,10 +31,6 @@
         <div class="main_content">
             {% block content %}
             {% endblock %}
-
-            <div class="content_disclaimer">
-                <strong>Please note</strong>: This site is still under construction.
-            </div>
         </div>
         <div class="loading_main loading">Loading results.... <i class="fa fa-spinner fa-spin"></i></div>
     </div>
@@ -114,9 +110,26 @@
     });
 
 
-    $( ".adv-filter-select" ).change(function() {
+    $( ".adv-filter-select, .excludeName" ).change(function() {
         submit_search($(this.closest('form')));
     });
+
+    $(".excludeName").change(function() {
+        //start here
+        console.log($(this).closest(".gene-query").length)
+        /*
+        if ($(this).closest("gene-query").val() !== '' || $(this).closest("gene-query").val() !== null){
+            console.log($(this).closest("gene-query").val())
+            submit_search($(this.closest('form')));
+        }
+        else{
+            const ele_changed = $(this);
+            $(".excludeName").each(function(){
+               $(this).val(ele_changed.prop('checked'))
+            });
+        }*/
+    });
+
 </script>
 
   {% block extrajs %}

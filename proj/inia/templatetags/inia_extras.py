@@ -18,7 +18,7 @@ def regulation_tooltip(direction):
 
 @register.simple_tag(name='exclude_name_form_checkbox')
 def exclude_name_form_checkbox(request):
-    input_field = "<input type='checkbox' name='excludeName' {} /> <small>Search Gene Symbols and Unique IDs Only"
+    input_field = "<input class='excludeName' type='checkbox' name='excludeName' {} /> <small>Search Gene Symbols and Unique IDs Only"
     if request.GET.get('excludeName', None):
         return mark_safe(input_field.format('checked'))
     else:

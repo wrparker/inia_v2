@@ -7,13 +7,21 @@
     <br />
     <form id="search_form" action="{% url 'inia:search' %}" method="get" />
         <input type="hidden" name="output" value="html" />
-        <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" />
+        Query:<input class='gene-query' type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" />
+    <br />
         {% exclude_name_form_checkbox request %} <br />
-    Filters:
-    {% advanced_gene_search_filters_as_table request %}
-    <br/>
+    <div class="row">
+        <div class="col-md-6">
+            Filters:<br />
+            {% advanced_gene_search_filters_as_table request %}
+        </div>
+        <div class="col-md-6">
+            {% include '_wildcard_box.html' %}
+        </div>
+    </div>
     <button type="submit" class="search-page-search-button">Search <i class="fa fa-search"></i></button> <br />
     </form>
+    <hr />
     {% if errors %}
         <div class="search-error">
             <ul>
@@ -24,7 +32,7 @@
         </div>
     {% endif %}
     {% if not genes %}
-        Enter some values to search IT-GED.
+        <p>Enter some values to search IT-GED.</p>
         {% else %}
         <p>Dataset Summary | View Gene Network | Overrepresentation Analysis | <a href="?{{ urlencode }}">Download CSV</a></p>
         <div class="pagination">
@@ -108,6 +116,4 @@
         </table>
 </div>
     {% endif %}
-<br /><br/>
-{% include '_wildcard_box.html' %}
 {%  endblock %}

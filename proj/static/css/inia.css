@@ -250,3 +250,14 @@ footer{
 #sidebar td{
     color:white;
 }
+
+.adv-filter-select{
+    width:100%;
+}
+button{
+    font-size:1.2em;
+    margin-top:10px;
+    border-radius: 15px;
+    padding: 10px;
+    text-align:center;
+}

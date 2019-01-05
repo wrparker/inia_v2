@@ -14,7 +14,7 @@
             <div class="loading loading_side"> <i class="fa fa-spinner fa-spin" style="color:white"></i></div>
             <form class="search_form" method="get" action="{% url 'inia:search' %}">
                 <input type="hidden" name="output" value="html" />
-                <input type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" /> <br/>
+                <input type="text" class="gene-query" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" /> <br/>
                 <p class="sidebar-text-reg">{% exclude_name_form_checkbox request %}</p>
                 {% advanced_gene_search_filters_as_table request %} <br />
                 <button type="submit" class="search-page-search-button">Perform Search <i class="fa fa-search"></i></button> <br />
