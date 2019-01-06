@@ -1,5 +1,5 @@
 .virtualenv
-idea
+.idea
 # Created by https://www.gitignore.io/api/django
 
 ### Django ###
