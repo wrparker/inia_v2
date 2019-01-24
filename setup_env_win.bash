@@ -12,7 +12,7 @@ echo '[global]' >> .virtualenv/pip.conf
 echo 'timeout = 1' >> .virtualenv/pip.conf
 echo 'index-url =  https://pypi.org/simple' >> .virtualenv/pip.conf
 virtualenv -p python .virtualenv --no-site-packages -v
-source ./.virtualenv/bin/activate
+source .virtualenv/Scripts/activate
 echo "Checking pip"
 which pip
 echo "Installing Requirements"
