@@ -4,7 +4,7 @@
 
 ### Ubuntu
 1. Run `bash setup_env.bash`
-2. Copy `env.example` to env
+2. Copy `env.example` to `.env`
 
 ### Windows
 1. Grab git bash shell for windows
