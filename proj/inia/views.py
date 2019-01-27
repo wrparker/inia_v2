@@ -27,6 +27,10 @@ def analysis_home(request):
     return render(request, 'analysis_home.html', {})
 
 
+def analysis_multisearch(request):
+    return render(request, 'analysis_multisearch.html', {})
+
+
 def about(request):
     return render(request, 'about.html', {})
 

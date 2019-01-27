@@ -203,6 +203,10 @@ footer{
     max-width:400px !important;
 }
 
+.hidden{
+    display:none;
+}
+
 
 /* Search stuff */
 
