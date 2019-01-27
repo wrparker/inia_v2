@@ -1,27 +1,27 @@
 // clear all checkboxes in brain regions
 function clearBrains() {
-	$('.brainCheck').attr('checked', false);
+	$('.brainCheck').prop('checked', false);
 	clearColor();
 }
 
 // clear all datasets
 function clearDatasets() {
-	$('.datasetCheck').attr('checked', false);
+	$('.datasetCheck').prop('checked', false);
 	clearColor();
 }
 
 // check/uncheck datasets when checking/unchecking brain region
 function selectPubsInRegion(region) {
-	if ($('#'+region).attr('checked'))
+	if ($('#'+region).is(':checked'))
 	{
 		// select all datasets containing a class matching the region of interest
 		flashGreen('.'+region);
-		$('.'+region).attr('checked', true);
+		$('.'+region).prop('checked', true);
 	}
 	else
 	{
 		flashRed('.'+region);
-		$('.'+region).attr('checked', false);
+		$('.'+region).prop('checked', false);
 		// get all datasets in that region, then set each to false
 		// also if we are unchecking a region whose parent publication is selected, we need to uncheck the parent
 		
@@ -33,9 +33,9 @@ function selectPubsInRegion(region) {
 			// extract the publication, which is form pub:{htmlid}
 			var match = classes.match(/\spub:(\w+)\s/i);
 			// uncheck the publication
-			if ($('#'+match[1]).attr('checked'))
+			if ($('#'+match[1]).is(':checked'))
 			{
-				$('#'+match[1]).attr('checked', false);
+				$('#'+match[1]).prop('checked', false);
 				flashRed('#'+match[1]+'Label');
 			}	
 		} );
@@ -57,9 +57,9 @@ function clearBrainRegion (region, dataset) {
 	var regions = region.split(/\s+/g);
 	for (var i in regions)
 	{
-		if ($('#'+regions[i]).attr('checked') == true && $('#'+dataset).attr('checked') == false)
+		if ($('#'+regions[i]).is(':checked') && !$('#'+dataset).is(':checked'))
 		{
-			$('#'+regions[i]).attr('checked', false);
+			$('#'+regions[i]).prop('checked', false);
 			flashRed('#'+regions[i]+"Label");
 		}
 		
@@ -67,22 +67,15 @@ function clearBrainRegion (region, dataset) {
 }
 
 // uncheck all datasets in a publication
-function clearPub (htmlid)
-{
-	$('#'+htmlid).attr('checked', false);
+function clearPub (htmlid){
+	$('#'+htmlid).prop('checked', false);
 }
 
 // select datasets belonging to a publication
-function selectPubDatasets (htmlid)
-{
-	if ($('#'+htmlid).attr('checked'))
-	{
-		$('.'+htmlid).attr('checked', true);
-	}
-	else
-	{
-		$('.'+htmlid).attr('checked', false);
-	}
+function selectPubDatasets (htmlid){
+	if($("#"+htmlid).is(":checked"))
+		$('.'+htmlid).prop('checked', true);
+	else $('.'+htmlid).prop('checked', false);
 }
 
 function flashGreen(idClass)

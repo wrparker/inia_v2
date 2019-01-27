@@ -257,12 +257,12 @@
                 <!--buttons for clearing all and selecting all the datasets-->
                 <input type="button" class="searchSubmit" name="setDataset" value="Select all"
                     onclick="if (confirm('Are you sure you want to select all the datasets?')){
-                                $('.datasetCheck').attr('checked', true);
+                                $('.datasetCheck').prop('checked', true);
                              }"><br>
                 <input type="button" class="searchSubmit" name="clearDataset" value="Clear all"
                     onclick="if (confirm('Are you sure you want to clear all the datasets?')){
-                                $('.datasetCheck').attr('checked', false);
-                                $('.pubCheck').attr('checked', false);
+                                $('.datasetCheck').prop('checked', false);
+                                $('.pubCheck').prop('checked', false);
                                 clearBrains();
                              }">
             </div>
@@ -344,7 +344,7 @@
 			$('#titleWrap').slideDown();
 			if (!document.getElementById('datasetCustom').checked)
 			{
-				$('#datasetAll').attr('checked', true);
+				$('#datasetAll').prop('checked', true);
 				$('#datasetSelFS').slideUp();
 			}
 			else
