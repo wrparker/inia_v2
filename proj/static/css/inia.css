@@ -187,6 +187,24 @@ footer{
     text-deccoration:none !important;
 }
 
+/* Analysis Multisearch Page */
+#datasetSelRight, #datasetSelLeft {
+    padding: .5em;
+}
+.info, #datasetSelRight {
+    border: 1px solid #1A5991;
+    background: #50ACD3;
+}
+#datasetSelRight {
+    width: 13em;
+    float:left;
+}
+#datasetSelLeft {
+    float: left;
+}
+input.searchSubmit, button.searchSubmit {
+    width: 8em;
+}
 
 /* Common/shared classes... */
 .info-box{
@@ -198,13 +216,14 @@ footer{
     margin-bottom:0px;
     margin-top:5px;
 }
-
 .wildcards{
     max-width:400px !important;
 }
-
 .hidden{
     display:none;
+}
+.indent{
+    margin-left:2em;
 }
 
 
