@@ -16,31 +16,30 @@
     </ul>
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="genes" role="tabpanel" aria-labelledby="genes-tab">
-          <!-- Content for Genes Tab -->
+            <!-- Content for Genes Tab -->
             <div class="analysis-home-tab-item">
-                <a href="#">
+                <a href="{% url 'inia:analysis_multisearch' %}">
                 <img src="{% static 'images/multiple_gene_analysis_home.png' %}"/>
                    <h2>Multiple Gene Analysis</h2>
                     <p>Create a custom dataset using your own dataset or favorite genes, then compare this dataset to
                         those in IT-GED or visualize the IT-GED interactions between your genes.</p>
                 </a>
             </div>
-
-            <div class="analysis-home-tab-item">
-                <a href="#">
-                <img src="{% static 'images/most_connected_analysis_home.png' %}"/>
-                   <h2>Most-Connected Genes</h2>
-                    <p>See the genes that appear in the largest number of IT-GED datasets. The repeated significance of
-                        these genes suggests their importance in the brain's genetic response to alcohol.</p>
-                </a>
-            </div>
-            <div class="analysis-home-tab-item">
-                <a href="#">
-                <img src="{% static 'images/reverse_network_analysis_home.png' %}"/>
-                   <h2>Reverse Network Analysis</h2>
-                    <p>Enter your favorite gene to find all the IT-GED genes that were significantly co-expressed with your gene.</p>
-                </a>
-            </div>
+        <div class="analysis-home-tab-item">
+            <a href="#">
+            <img src="{% static 'images/most_connected_analysis_home.png' %}"/>
+               <h2>Most-Connected Genes</h2>
+                <p>See the genes that appear in the largest number of IT-GED datasets. The repeated significance of
+                    these genes suggests their importance in the brain's genetic response to alcohol.</p>
+            </a>
+        </div>
+        <div class="analysis-home-tab-item">
+            <a href="#">
+            <img src="{% static 'images/reverse_network_analysis_home.png' %}"/>
+               <h2>Reverse Network Analysis</h2>
+                <p>Enter your favorite gene to find all the IT-GED genes that were significantly co-expressed with your gene.</p>
+            </a>
+        </div>
 
         </div>
         <div class="tab-pane fade" id="datasets" role="tabpanel" aria-labelledby="datasets-tab">
