@@ -55,14 +55,20 @@
 </div>
 <h3>Total results:{{ total_results }}</h3>
 
+        <small><a href="#toggle" class="ortholog-toggle">Show Ortholog Columns</a></small>
 <div class="table-responsive">
         <table class="table result-table">
         <tr>
+        <td class="col-name">NCBI UID</td>
         <td class="col-name">Gene Symbol</td>
         <td class="col-name">Gene Name</td>
         <td class="col-name">Aliases</td>
+        <td class="col-name ortholog-column">HomoloGene Id</td>
+        <td class="col-name ortholog-column">Human Orthologs</td>
+        <td class="col-name ortholog-column">Rat Orthologs</td>
+        <td class="col-name ortholog-column">Mouse Orthologs</td>
         <td class="col-name">Gene Expression Platform</td>
-        <td class="col-name">Probe/Gene ID</td>
+        <td class="col-name">Probe Id</td>
         <td class="col-name">Species</td>
         <td class="col-name">Ethanol/Treatment</td>
         <td class="col-name">Brain region/Cell type</td>
@@ -74,6 +80,13 @@
         </tr>
         {% for gene in genes %}
             <tr>
+            <td>{% if not gene.ncbi_uid %}
+                    -
+                {%  else %}
+                    <a target="_blank" href='https://www.ncbi.nlm.nih.gov/gene?term="{{gene.ncbi_uid}}"[uid]' >{{ gene.ncbi_uid }}
+                    <i class="fa fa-external-link"></i>
+                {%  endif %}
+            </td>
             <td> {% if not gene.gene_symbol %}
                 -
             {% else %}
@@ -88,8 +101,43 @@
                     {% endfor %}
             {% endif %}
             </td>
+
+            <td class="ortholog-column">
+              {% if not gene.get_homologene_id %}
+                  -
+              {%  else %}
+                <a href="http://www.ncbi.nlm.nih.gov/homologene?term={{ gene.get_homologene_id }}%5Buid%5D">
+                {{ gene.get_homologene_id }}
+                <i class="fa fa-external-link"></i>
+                </a>
+
+              {% endif %}
+            </td>
+            <td class="ortholog-column">
+                {% if not gene.list_human_orthologs %}
+                    -
+                    {% else %}
+                    {{gene.list_human_orthologs}}
+                {% endif %}
+            </td>
+            <td class="ortholog-column">
+                {% if not gene.list_rat_orthologs %}
+                    -
+                    {% else %}
+                    {{gene.list_rat_orthologs}}
+                {% endif %}
+            </td>
+                        <td class="ortholog-column">
+                {% if not gene.list_mouse_orthologs %}
+                    -
+                    {% else %}
+                    {{gene.list_mouse_orthologs}}
+                {% endif %}
+            </td>
+
+
             <td>{{ gene.dataset.microarray }}</td>
-            <td>{{ gene.uniqueID }}</td>
+            <td>{{gene.probe_id}}</td>
             <td>{{ gene.dataset.species }}</td>
             <td>{{ gene.dataset.treatment }}</td>
             <td>{{ gene.dataset.brain_region.name}}</td>
@@ -116,7 +164,8 @@
         </table>
 </div>
     {% endif %}
-{%  endblock %}{% block extrajs %}
+{%  endblock %}
+{% block extrajs %}
 <script>
 $(document).ready(function(){
     //Only include this in extrajs on search pages.

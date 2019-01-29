@@ -164,7 +164,25 @@ class IniaGene(models.Model):  # Genes we do through experimentation
     homologenes = models.ManyToManyField(Homologene)
     updated = models.DateTimeField(auto_now=True)
 
+    def list_human_orthologs(self):
+        return ', '.join(self.homologenes.all().filter(species=SpeciesType.HOMO_SAPIENS).values_list('gene_symbol',
+                                                                                                     flat=True))
 
+
+
+    def list_rat_orthologs(self):
+        return ', '.join(self.homologenes.all().filter(species=SpeciesType.RATTUS_NORVEGICUS).values_list('gene_symbol',
+                                                                                                          flat=True))
+
+    def list_mouse_orthologs(self):
+        return ', '.join(self.homologenes.all().filter(species=SpeciesType.MUS_MUSCULUS).values_list('gene_symbol',
+                                                                                                     flat=True))
+
+    def get_homologene_id(self):
+        if self.homologenes.all():
+            return self.homologenes.first().homologene_group_id
+        else:
+             return None
      # some way to do coinverison here?
 
 class GeneAliases(models.Model):
