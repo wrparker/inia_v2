@@ -110,29 +110,33 @@ def search(request):
                                                    })
         else:  #if we don't recognize 'html' or whatever we just make it a csv, return the file.
             # convert to dict...
-            genes = genes.select_related('dataset__name')
-            genes = genes.values('ncbi_uid',
-                                 'gene_symbol',
-                                 'gene_name',
-                                 'probe_id',
-                                 'dataset__species',
-                                 'dataset__brain_region',
-                                 'dataset__treatment',
-                                 'p_value',
-                                 'direction',
-                                 'fdr',
-                                 'dataset__name',
-                                 'dataset__publication'
-                                 )
-            _LOG.info(genes[0]['dataset__publication'])
-            result_file = dict_list_to_csv(genes)
+            output = []
+            for gene in genes:
+                gene_info = {}
+                gene_info['NCBI UID'] = gene.ncbi_uid
+                gene_info['Gene Symbol'] = gene.ncbi_uid
+                gene_info['Gene Name'] = gene.ncbi_uid
+                gene_info['aliases'] = ', '.join(gene.genealiases_set.all().values_list('symbol', flat=True))
+                gene_info['Homologene Id'] = gene.get_homologene_id()
+                gene_info['Human Orthologs'] = gene.list_human_orthologs()
+                gene_info['Rat Orthologs'] = gene.list_rat_orthologs()
+                gene_info['Mouse Orthologs'] = gene.list_mouse_orthologs()
+                gene_info['Gene Expression Platform'] = gene.dataset.microarray
+                gene_info['Probe Id'] = gene.probe_id
+                gene_info['Species'] = gene.dataset.species
+                gene_info['Ethanol/Treatment'] = gene.dataset.treatment
+                gene_info['Brain region/Cell type'] = gene.dataset.brain_region.name
+                gene_info['P-value'] = gene.p_value
+                gene_info['Direction of Change'] = gene.direction
+                gene_info['Est FDR'] = gene.fdr
+                gene_info['Dataset'] = gene.dataset.name
+                gene_info['Reference'] = gene.dataset.publication.get_short_name()
+                output.append(gene_info)
+            result_file = dict_list_to_csv(output)
             response = HttpResponse(content=open(result_file, 'rb'))
             response['Content-Type'] = 'text'
             response['Content-Disposition'] = 'attachment; filename="results.csv"'
             return response
-
-
-
     else:
         return render(request, 'search.html', {'errors': errors})
 

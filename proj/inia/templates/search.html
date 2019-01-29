@@ -85,6 +85,7 @@
                 {%  else %}
                     <a target="_blank" href='https://www.ncbi.nlm.nih.gov/gene?term="{{gene.ncbi_uid}}"[uid]' >{{ gene.ncbi_uid }}
                     <i class="fa fa-external-link"></i>
+                    </a>
                 {%  endif %}
             </td>
             <td> {% if not gene.gene_symbol %}
@@ -97,7 +98,8 @@
             <td>{{gene.gene_name}}</td>
             <td>{% if not gene.genealiases_set.all %} - {% else %}
                 {%  for alias in gene.genealiases_set.all %}
-                    {{ alias.symbol }},
+                    {{ alias.symbol }}
+                    {% if not forloop.last %}, {% endif %}
                     {% endfor %}
             {% endif %}
             </td>

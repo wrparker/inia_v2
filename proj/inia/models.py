@@ -175,10 +175,10 @@ class IniaGene(models.Model):  # Genes we do through experimentation
                                                                                                      flat=True))
 
     def get_homologene_id(self):
-        if self.homologenes.all():
+        if len(self.homologenes.all()):
             return self.homologenes.first().homologene_group_id
         else:
-             return None
+             return ''
      # some way to do coinverison here?
 
 
