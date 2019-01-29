@@ -260,6 +260,12 @@ button{
     border-radius: 15px;
     padding: 10px;
     text-align:center;
+}
+
+.ortholog-column{
+    display: none;
+}
+
 mark{
     background-color:yellow !important;
     font-weight:bold;

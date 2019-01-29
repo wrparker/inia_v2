@@ -93,20 +93,46 @@ def search(request):
 
         genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
         total_results = len(genes)
-        paginator = Paginator(genes, 100)
-        page = request.GET.get('page', 1)
-        query = request.GET.urlencode()
-        query = parse_qs(query)
-        query.pop('page', None)
-        query.pop('output', None)
-        query = urlencode(query, doseq=True)
-        genes = paginator.get_page(page)
         if output == 'html':
+            # Only paginate HTML format.
+            paginator = Paginator(genes, 100)
+            page = request.GET.get('page', 1)
+            query = request.GET.urlencode()
+            query = parse_qs(query)
+            query.pop('page', None)
+            query.pop('output', None)
+            query = urlencode(query, doseq=True)
+            genes = paginator.get_page(page)
             return render(request, 'search.html', {'genes': genes,
                                                    'urlencode': query,
                                                    'total_results': total_results,
                                                    'errors': errors
                                                    })
+        else:  #if we don't recognize 'html' or whatever we just make it a csv, return the file.
+            # convert to dict...
+            genes = genes.select_related('dataset__name')
+            genes = genes.values('ncbi_uid',
+                                 'gene_symbol',
+                                 'gene_name',
+                                 'probe_id',
+                                 'dataset__species',
+                                 'dataset__brain_region',
+                                 'dataset__treatment',
+                                 'p_value',
+                                 'direction',
+                                 'fdr',
+                                 'dataset__name',
+                                 'dataset__publication'
+                                 )
+            _LOG.info(genes[0]['dataset__publication'])
+            result_file = dict_list_to_csv(genes)
+            response = HttpResponse(content=open(result_file, 'rb'))
+            response['Content-Type'] = 'text'
+            response['Content-Disposition'] = 'attachment; filename="results.csv"'
+            return response
+
+
+
     else:
         return render(request, 'search.html', {'errors': errors})
 
