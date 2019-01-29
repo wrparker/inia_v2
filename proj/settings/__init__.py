@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+import logging
 import os
 from dotenv import load_dotenv
+
+_LOG = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -200,6 +202,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'assets')  # Where all static files are collected to be served.
+
+# Make the autocomplete.
+if not os.path.isfile(os.path.join(STATICFILES_DIRS[0], 'js', 'search_autocomplete.js')):
+    _LOG.warning("WARNING: Autocomplete needs to be generated.")
+
 
 
 # Google RECAPTCHA

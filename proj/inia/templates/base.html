@@ -9,8 +9,10 @@
     <meta name="description" content="IT-GED is a database containing an aggregation of significant high alcohol consumption microarray data." />
     <meta name="keywords" content="IT-GED, IT-GED, ITGED, I-GED, IGED, INIA Gene Expression Database, INIA Texas Gene Expression Database, INIA, gene, gene expression, microarray, alcohol, alcoholism" />
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.min.css" />
+
     <link rel="stylesheet" href="{% static "css/inia.css" %}" />
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- Leave those next 4 lines if you care about users using IE8 -->
@@ -40,9 +42,19 @@
 
 
 <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+  integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+  crossorigin="anonymous"></script>
+
+  <script src="{%  static 'js/search_autocomplete.js' %}" ></script>
+
 <!-- JQuery for Web Search... -->
 <script type="text/javascript">
   $("[rel=tooltip]").tooltip({html:true});
@@ -130,7 +142,14 @@
         }*/
     });
 
+    $(".ortholog-toggle").click(function(e){
+        e.preventDefault()
+        $(".ortholog-column").each(function(){
+            $(this).toggle();
+        });
+    });
 </script>
+
 
   {% block extrajs %}
 {% endblock %}
