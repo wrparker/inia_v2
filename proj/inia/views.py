@@ -1,3 +1,5 @@
+import tempfile
+import csv
 from django.http import HttpResponse
 from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
@@ -107,3 +109,21 @@ def search(request):
                                                    })
     else:
         return render(request, 'search.html', {'errors': errors})
+
+
+def dict_list_to_csv(dict_list):
+    '''
+    :param dict_list: A list of dictionaries
+    :return: None if invalid input, file location if valid.
+    '''
+    if len(dict_list) < 1:
+        return None
+    keys = dict_list[0].keys()
+    tmp_file = tempfile.mkstemp(suffix='.csv', prefix='output')
+    with open(tmp_file[1], 'w') as f:
+        dict_writer = csv.DictWriter(f,
+                                     fieldnames=keys,
+                                     quoting=csv.QUOTE_ALL)
+        dict_writer.writeheader()
+        dict_writer.writerows(dict_list)
+    return tmp_file[1]
