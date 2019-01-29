@@ -121,8 +121,6 @@ class Dataset(models.Model):
         return len(self.iniagene_set.all())
 
 
-
-
 class Homologene(models.Model):
     '''This is basically just a lookup table that is populated by NCBI Homologene Database:
     https://www.ncbi.nlm.nih.gov/homologene
@@ -168,8 +166,6 @@ class IniaGene(models.Model):  # Genes we do through experimentation
         return ', '.join(self.homologenes.all().filter(species=SpeciesType.HOMO_SAPIENS).values_list('gene_symbol',
                                                                                                      flat=True))
 
-
-
     def list_rat_orthologs(self):
         return ', '.join(self.homologenes.all().filter(species=SpeciesType.RATTUS_NORVEGICUS).values_list('gene_symbol',
                                                                                                           flat=True))
@@ -184,6 +180,7 @@ class IniaGene(models.Model):  # Genes we do through experimentation
         else:
              return None
      # some way to do coinverison here?
+
 
 class GeneAliases(models.Model):
     ''' This model contains the relationship between the allowed gene aliases per IniaGene.  No real hard checks here...
