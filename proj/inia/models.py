@@ -128,7 +128,7 @@ class Homologene(models.Model):
     https://www.ncbi.nlm.nih.gov/homologene
     Items that share the same homlogene_group_id across species are homologenes.
     '''
-    homologene_group_id = models.IntegerField(db_index=True)
+    homologene_group_id = models.IntegerField(db_index=True)  # NCBI reference
     gene_symbol = models.CharField(max_length=255)
     created_at = models.DateField(auto_now=True)
     updated_at = models.DateField(auto_now=True)
@@ -153,7 +153,8 @@ class IniaGene(models.Model):  # Genes we do through experimentation
 
 
     legacy_id = models.IntegerField(db_index=True)  # From version 1.
-    uniqueID = models.CharField(max_length=255)  # This is some NIH variable.  WE should name it something better.
+    ncbi_uid = models.IntegerField(default=None, null=True)  # Not everyone has an ncbi_uid.
+    probe_id = models.CharField(max_length=255)  # Some kind of variable like LILMN_41111
     gene_symbol = models.CharField(max_length=255, blank=True)
     gene_name = models.CharField(max_length=255)
     p_value = models.FloatField(null=True, blank=True)  # stats

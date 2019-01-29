@@ -181,7 +181,7 @@ class Command(BaseCommand):
 
                 newGene = IniaGene.objects.create(
                     legacy_id=values['legacy_id'],
-                    uniqueID=values['uniqueID'],
+                    probe_id=values['uniqueID'],
                     gene_symbol=values['geneSymbol'],
                     gene_name=values['geneName'],
                     p_value=values['pvalue'],

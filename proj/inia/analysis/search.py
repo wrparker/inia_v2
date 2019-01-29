@@ -37,7 +37,7 @@ def base_gene_search(search, exclude_name=False):
             term = term.strip("'")
             if term.isdigit():
                 results = results | IniaGene.objects.filter(
-                    Q(uniqueID=term) |
+                    Q(ncbi_uid=term) |
                     Q(homologenes__homologene_group_id=term)
                 )
             #regex exact match:
@@ -45,6 +45,7 @@ def base_gene_search(search, exclude_name=False):
                 for regex_conversion in _WEBAPP_REGEX_SYMBOLS.keys():
                     term = term.replace(regex_conversion, _WEBAPP_REGEX_SYMBOLS[regex_conversion])
                 results = results | IniaGene.objects.filter(
+                    Q(probe_id__iregex=term) |
                     Q(gene_symbol__iregex=term) |
                     Q(homologenes__gene_symbol__iregex=term) |
                     Q(genealiases__symbol__iregex=term)
@@ -53,6 +54,7 @@ def base_gene_search(search, exclude_name=False):
                     results = results | IniaGene.objects.filter(Q(gene_name__iregex='.*' + term + '.*'))
             else:
                 results = results | IniaGene.objects.filter(
+                    Q(probe_id__iexact=term) |
                     Q(gene_symbol__iexact=term) |
                     Q(homologenes__gene_symbol__iexact=term) |
                     Q(genealiases__symbol__iexact=term)
@@ -64,6 +66,7 @@ def base_gene_search(search, exclude_name=False):
             for regex_conversion in _WEBAPP_REGEX_SYMBOLS.keys():
                 term = term.replace(regex_conversion, _WEBAPP_REGEX_SYMBOLS[regex_conversion])
             results = results | IniaGene.objects.filter(
+                Q(probe_id__iregex=term) |
                 Q(gene_symbol__iregex=term) |
                 Q(homologenes__gene_symbol__iregex=term) |
                 Q(genealiases__symbol__iregex=term)
@@ -75,11 +78,12 @@ def base_gene_search(search, exclude_name=False):
         else:
             if term.isdigit():
                 results = results | IniaGene.objects.filter(
-                    Q(uniqueID=term) |
+                    Q(ncbi_uid=term) |
                     Q(homologenes__homologene_group_id=term)
                 )
             else:
                 results = results | IniaGene.objects.filter(
+                    Q(probe_id__icontains=term) |
                     Q(gene_symbol__icontains=term) |
                     Q(homologenes__gene_symbol__icontains=term) |
                     Q(genealiases__symbol__icontains=term)
