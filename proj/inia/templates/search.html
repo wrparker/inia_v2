@@ -116,4 +116,13 @@
         </table>
 </div>
     {% endif %}
-{%  endblock %}
+{%  endblock %}{% block extrajs %}
+<script>
+$(document).ready(function(){
+    //Only include this in extrajs on search pages.
+    search_mark_options = {separateWordSearch: false, diacritics: false, debug: false}
+    mark_val = $('.gene-query').val()
+    $('td').mark(mark_val, search_mark_options)
+});
+</script>
+{% endblock %}
