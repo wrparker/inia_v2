@@ -85,20 +85,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'inia.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'USER': os.getenv('DB_USER', False),
-        'PASSWORD': os.getenv('DB_PASSWORD', False),
-        'NAME': os.getenv('DB_NAME', False),
-        'HOST': os.getenv('DB_HOST', False),
-        'PORT': os.getenv('DB_PORT', False),
-    }
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -221,6 +207,9 @@ CACHE_MIDDLEWARE_SECONDS = 3600 # Cache for one hour.
 # TODO: come back.
 if ENVIRONMENT == 'dev':
     from .local_dev import *
+
+elif ENVIRONMENT == 'qa':
+    from .local_qa import *
 
 elif ENVIRONMENT == 'prod':
     from .local_prod import *

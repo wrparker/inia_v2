@@ -2,7 +2,6 @@ import sys
 globals().update(vars(sys.modules["settings"]))
 
 DEBUG = False
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
