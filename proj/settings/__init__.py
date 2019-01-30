@@ -206,6 +206,7 @@ CACHE_MIDDLEWARE_SECONDS = 3600 # Cache for one hour.
 # Load variables based on environment:
 # TODO: come back.
 if ENVIRONMENT == 'dev':
+    DEV_IN_POSTGRES = os.getenv('DEV_IN_POSTGRES', False)
     from .local_dev import *
 
 elif ENVIRONMENT == 'qa':
