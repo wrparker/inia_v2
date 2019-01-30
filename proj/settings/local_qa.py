@@ -1,6 +1,8 @@
 import sys
 globals().update(vars(sys.modules["settings"]))
 
+ALLOWED_HOSTS += ['iniav2-qa.herokuapp.com']
+
 DEBUG = True
 DATABASES = {
     'default': {

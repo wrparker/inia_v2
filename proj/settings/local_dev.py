@@ -7,7 +7,7 @@ globals().update(vars(sys.modules["settings"]))
 
 CACHE_MIDDLEWARE_SECONDS = 0 # Really just prevents us form caching in dev environment.
 
-ALLOWED_HOSTS += ['localhost', 'iniav2-qa.herokuapp.com']
+ALLOWED_HOSTS += ['*']
 
 # SQLite, uncomment to use this instead of mysql.
 
