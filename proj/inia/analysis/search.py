@@ -137,19 +137,19 @@ class LegacyAPIHelper:
             return iniagene_queryset.filter(direction__iexact=needle)
 
         def get_model(needle):
-            return iniagene_queryset.filter(dataset__model=needle)
+            return iniagene_queryset.filter(dataset__model__iexact=needle)
 
         def get_phenotype(needle):
-            return iniagene_queryset.filter(dataset__phenotype=needle)
+            return iniagene_queryset.filter(dataset__phenotype__iexact=needle)
 
         def get_species(needle):
-            return iniagene_queryset.filter(dataset__species=needle)
+            return iniagene_queryset.filter(dataset__species__iexact=needle)
 
         def get_brain_region(needle):
-            region = BrainRegion.objects.get(Q(name=needle) | Q(abbreviation=needle))
+            region = BrainRegion.objects.get(Q(name__iexact=needle) | Q(abbreviation__iexact=needle))
             if region.is_super_group:
                 return iniagene_queryset.filter(Q(dataset__brain_region=region) |
-                                               Q(dataset__brain_region__in=region.sub_groups.all()))
+                                                Q(dataset__brain_region__in=region.sub_groups.all()))
             else:
                 return iniagene_queryset.filter(Q(dataset__brain_region=region))
 
@@ -160,7 +160,7 @@ class LegacyAPIHelper:
             return iniagene_queryset.filter(dataset__publication__htmlid__iexact=needle)
 
         def get_dataset(needle):
-            return iniagene_queryset.filter(dataset__name=needle)
+            return iniagene_queryset.filter(dataset__name__iexact=needle)
 
         filter_map = {
             'microarray': get_microarray,
@@ -182,7 +182,7 @@ class LegacyAPIHelper:
             return [choice[0].lower() if result_as_lower else choice[0] for choice in Dataset.objects.values_list('microarray').distinct()]
 
         def get_alcohol():
-            return ['YES', 'NO']
+            return ['yes', 'no']
 
         def get_direction():
             return [choice[0].lower() if result_as_lower else choice[0] for choice in IniaGene.DIRECTION_CHOICES]
