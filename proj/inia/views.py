@@ -93,6 +93,7 @@ def search(request):
 
         genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
         # Speed up queries.
+        # TODO: how can we make this more faster/effective with less queries.  
         genes = genes.prefetch_related('dataset', 'homologenes', 'dataset__publication').all()
         total_results = len(genes)
         if output == 'html':
@@ -127,7 +128,7 @@ def search(request):
                 gene_info['Probe Id'] = gene.probe_id
                 gene_info['Species'] = gene.dataset.species
                 gene_info['Ethanol/Treatment'] = gene.dataset.treatment
-                gene_info['Brain region/Cell type'] = gene.dataset.brain_region.name
+                gene_info['Brain region/Cell type'] = ','.join([f.name for f in gene.dataset.brain_regions.all()])
                 gene_info['P-value'] = gene.p_value
                 gene_info['Direction of Change'] = gene.direction
                 gene_info['Est FDR'] = gene.fdr
