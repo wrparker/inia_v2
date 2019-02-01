@@ -92,6 +92,8 @@ def search(request):
                     errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
 
         genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
+        # Speed up queries.
+        genes = genes.prefetch_related('dataset', 'homologenes', 'dataset__publication').all()
         total_results = len(genes)
         if output == 'html':
             # Only paginate HTML format.
