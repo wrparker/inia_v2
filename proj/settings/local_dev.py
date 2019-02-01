@@ -9,7 +9,18 @@ CACHE_MIDDLEWARE_SECONDS = 0 # Really just prevents us form caching in dev envir
 
 ALLOWED_HOSTS += ['*']
 
-if not DEV_IN_POSTGRES:
+if RUNNING_IN_DOCKER:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'NAME': 'postgres',
+            'HOST': 'postgres',
+            'PORT': 5432,
+        }
+    }
+elif not DEV_IN_POSTGRES:
     # SQLite
     DATABASES = {
         'default': {
@@ -18,7 +29,7 @@ if not DEV_IN_POSTGRES:
         }
     }
 else:
-    # Use psql instead
+    # Use psql specified in .env
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -29,5 +40,3 @@ else:
             'PORT': os.getenv('DB_PORT', False),
         }
     }
-
-

@@ -23,7 +23,7 @@ LOGGING_DIR = os.path.join(PROJECT_DIR, 'logs')
 
 load_dotenv(os.path.join(PROJECT_DIR, '.env'))
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'dev')
-
+RUNNING_IN_DOCKER = os.getenv('RUNNING_IN_DOCKER', False)
 
 
 # Quick-start development settings - unsuitable for production
