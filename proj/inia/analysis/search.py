@@ -147,11 +147,7 @@ class LegacyAPIHelper:
 
         def get_brain_region(needle):
             region = BrainRegion.objects.get(Q(name__iexact=needle) | Q(abbreviation__iexact=needle))
-            if region.is_super_group:
-                return iniagene_queryset.filter(Q(dataset__brain_region=region) |
-                                                Q(dataset__brain_region__in=region.sub_groups.all()))
-            else:
-                return iniagene_queryset.filter(Q(dataset__brain_region=region))
+            return iniagene_queryset.filter(Q(dataset__brain_regions__in=[region])).distinct()
 
         def get_paradigm(needle):
             return iniagene_queryset.filter(dataset__paradigm__iexact=needle)

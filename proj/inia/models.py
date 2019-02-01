@@ -78,15 +78,7 @@ class BrainRegion(models.Model):
 
     name = models.CharField(unique=True, max_length=255)
     abbreviation = models.CharField(unique=True, max_length=255)
-    sub_groups = models.ManyToManyField("self", blank=True)
-    is_super_group = models.BooleanField("self", blank=True, default=False)
 
-    def get_group_and_subgroup(self):
-        '''Always returns a list.'''
-        groups = [self]
-        if self.is_super_group:
-            groups.extend(self.sub_groups.all())
-        return groups
 
 
 class Dataset(models.Model):
@@ -112,7 +104,7 @@ class Dataset(models.Model):
     model = models.CharField(max_length=255)
     phenotype = models.CharField(max_length=255)
     species = models.CharField(max_length=255, choices=SpeciesType.SPECIES_CHOICES)
-    brain_region = models.ForeignKey(BrainRegion, on_delete=models.PROTECT)
+    brain_regions = models.ManyToManyField(BrainRegion, blank=True)  # treat like a tag.
     paradigm = models.CharField(max_length=255)
     paradigm_duration = models.CharField(max_length=255)
     alcohol = models.BooleanField()
