@@ -206,6 +206,44 @@ input.searchSubmit, button.searchSubmit {
     width: 8em;
 }
 
+/* Analysis Results Table */
+table.search {
+	font-size: 75%;
+	border-color: #1A5991;
+	border-width: 3px;
+	border-collapse:collapse;
+	border-style: solid;
+}
+
+td.search {
+	border: 1px solid #1A5991;
+	padding-left: .4em;
+	padding-right: .4em;
+}
+
+td.search.head {
+	font-weight: bold;
+	font-size: 103%;
+}
+
+td.search.head:not(.side), td.search.head.corner {
+	border-bottom: 3px solid #1A5991;
+	border-top: 3px solid #1A5991;
+}
+
+td.search.head.side {
+	border-right: 3px solid #1A5991;
+	border-left: 3px solid #1A5991;
+}
+
+tr.alt {
+	background: #0092D6;
+}
+
+td.reverse {
+	max-width: 30em;
+}
+
 /* Common/shared classes... */
 .info-box{
     border: 1px solid #1A5991;

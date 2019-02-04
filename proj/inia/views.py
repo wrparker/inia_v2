@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
+from inia.models import SpeciesType
 
 
 import logging
@@ -26,7 +27,35 @@ def analysis_home(request):
 
 
 def analysis_multisearch(request):
-    return render(request, 'analysis_multisearch.html', {})
+    genes, datasets, records = '', [], []
+    if request.method == "GET":
+        pass
+        # check file on id for data to load
+    elif request.method == "POST":
+        analysis_type = request.POST.get('type')
+        genes = request.POST.get('allgenes').split(',')
+        if request.POST.get('species') == 'mouse':
+            species = SpeciesType.MUS_MUSCULUS
+        elif request.POST.get('species') == 'rat':
+            species = SpeciesType.RATTUS_NORVEGICUS
+        else:
+            species = SpeciesType.HOMO_SAPIENS
+        if analysis_type == 'multisearch':
+            for s in genes:
+                records.append(IniaGene.objects.filter(gene_symbol__iexact=s,
+                                                       dataset__species__iexact=species))
+                for r in records:
+                    datasets.append(r.dataset)
+                datasets = set(datasets)
+                num_datasets = len(datasets)
+        elif analysis_type == 'network':
+            pass
+        elif analysis_type == 'dataset':
+            pass
+        else:
+            pass
+        # create file for data
+    return render(request, 'analysis_multisearch.html', {'genes': genes, 'datasets': datasets, 'records': records})
 
 
 def about(request):
@@ -39,6 +68,7 @@ def contact(request):
 
 def links(request):
     return render(request, 'links.html', {})
+
 
 def help_home(request):
     return render(request, 'help_home.html', {})
