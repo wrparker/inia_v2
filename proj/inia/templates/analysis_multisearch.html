@@ -3,22 +3,27 @@
 
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
-<h2 class="nomargin">Multiple Gene Analysis</h2>
-<br>
-<noscript><p class="small info">
-    Except for network analysis, all IT-GED features work with JavaScript disabled.
-    However, turning on JavaScript will provide for a better experience.
-</p></noscript>
-<p><strong>Multiple Gene Search</strong>:
-    Search for multiple genes in IT-GED simultaneously and generate a summary table of those genes.</p>
-<p><strong>Gene Network</strong>:
-    Visualize the interactions between genes (see details <a href="/help#network">here</a>).</p>
-<p><strong>Overrepresentation (Enrichment) Analysis</strong>:
-    Compare your dataset with those in IT-GED to find the ones that most closely match.</p>
-<p><strong>Dataset Network</strong>: See where your dataset fits in among the IT-GED datasets.</p>
-<br>
-<form name="allgenesform" id="allgenesform" class="analysis" method="post" action="index">
-	<label>Type of analysis: </label>
+{% if genes %}
+    {% include '_multisearch_top.html' %}
+{% else %}
+    <h2 class="nomargin">Multiple Gene Analysis</h2>
+    <br>
+    <noscript><p class="small info">
+        Except for network analysis, all IT-GED features work with JavaScript disabled.
+        However, turning on JavaScript will provide for a better experience.
+    </p></noscript>
+    <p><strong>Multiple Gene Search</strong>:
+        Search for multiple genes in IT-GED simultaneously and generate a summary table of those genes.</p>
+    <p><strong>Gene Network</strong>:
+        Visualize the interactions between genes (see details <a href="/help#network">here</a>).</p>
+    <p><strong>Overrepresentation (Enrichment) Analysis</strong>:
+        Compare your dataset with those in IT-GED to find the ones that most closely match.</p>
+    <p><strong>Dataset Network</strong>: See where your dataset fits in among the IT-GED datasets.</p>
+    <br>
+{% endif %}
+<form name="allgenesform" id="allgenesform" class="analysis" method="post" action="">
+	{% csrf_token %}
+    <label>Type of analysis: </label>
 	<input type="radio" name="type" value="multisearch" id="typesearch" onchange="agSelect()" checked="checked">
 	<label for="typesearch">Multiple Gene Search</label>
 
