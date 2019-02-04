@@ -33,7 +33,9 @@ def analysis_multisearch(request):
         # check file on id for data to load
     elif request.method == "POST":
         analysis_type = request.POST.get('type')
-        genes = request.POST.get('allgenes').split(',')
+        genes = [gene.lower() for gene in request.POST.get('allgenes').split(',')]
+        genes = set(genes) # Takes unique values
+
         if request.POST.get('species') == 'mouse':
             species = SpeciesType.MUS_MUSCULUS
         elif request.POST.get('species') == 'rat':
@@ -42,12 +44,12 @@ def analysis_multisearch(request):
             species = SpeciesType.HOMO_SAPIENS
         if analysis_type == 'multisearch':
             for s in genes:
-                records.append(IniaGene.objects.filter(gene_symbol__iexact=s,
-                                                       dataset__species__iexact=species))
-                for r in records:
-                    datasets.append(r.dataset)
-                datasets = set(datasets)
-                num_datasets = len(datasets)
+                records.extend(IniaGene.objects.filter(gene_symbol__iexact=s,
+                                                       dataset__species=species))
+            for r in records:
+                datasets.append(r.dataset)
+            datasets = set(datasets)
+            num_datasets = len(datasets)
         elif analysis_type == 'network':
             pass
         elif analysis_type == 'dataset':
