@@ -141,12 +141,12 @@
             <td>{{ gene.dataset.microarray }}</td>
             <td>{{gene.probe_id}}</td>
             <td>{{ gene.dataset.species }}</td>
-            <td>{{ gene.dataset.treatment }}</td>
+            <td class="no-mark">{{ gene.dataset.treatment }}</td>
             <td>{{ gene.dataset.brain_region.name}}</td>
-            <td>{{ gene.p_value }}</td>
+            <td class="no-mark">{{ gene.p_value }}</td>
             {% direction_tooltip gene.direction %}
 
-            <td>{{ gene.fdr }}</td>
+            <td class="no-mark">{{ gene.fdr }}</td>
             <td id="tooltip" rel='tooltip' data-placement="left" data-original-title='<strong>{{ gene.dataset.name }}</strong><br /><strong>Alcohol on board</strong>: {{gene.dataset.alcohol|yesno:"YES,NO"}}<br/><strong>INIA Model</strong>: {{gene.dataset.model}}<br/><strong>Phenotype</strong>: {{ gene.dataset.phenotype }}<br/><strong>Paradigm</strong>: {{ gene.dataset.paradigm }}<br/><strong>Brain Region</strong>: {{ gene.dataset.brain_region.name }} ({{gene.dataset.brain_region.abbreviation }})<br/>'>
                 <a href="{% url 'inia:search' %}?dataset={{ gene.dataset.name }}&output=html" />
                     {{ gene.dataset.name }}
@@ -173,7 +173,12 @@ $(document).ready(function(){
     //Only include this in extrajs on search pages.
     search_mark_options = {separateWordSearch: false, diacritics: false, debug: false}
     mark_val = $('.gene-query').val()
-    $('td').mark(mark_val, search_mark_options)
+    $('td').each(function(){
+        if (! $(this).hasClass("no-mark")){
+            $(this).mark(mark_val, search_mark_options)
+        }
+    });
+    //$('td').mark(mark_val, search_mark_options)
 });
 </script>
 {% endblock %}
