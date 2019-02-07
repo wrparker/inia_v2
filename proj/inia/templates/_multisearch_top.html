@@ -27,7 +27,7 @@
 <div id="missingwrapper" class="small">
     <p> - Genes marked with a (*) do not have a HomoloGene ID</p></div>
     <br>
-{% if records %}
+{% if genes %}
     <p class="small">Click a gene symbol to view detailed IT-GED information for that gene.</p>
     <table class="search">
         <tbody>
@@ -39,22 +39,22 @@
             <td class="search head">Datasets</td>
         </tr>
         <!-- generate tr for each gene symbol -->
-        {%  for g in genes %}
-	    <tr class="search ">
-            <td class="search"><a href="/search?gene=3&amp;output=html">g.SYMBOL</a></td>
-            <td class="search"><a href="/search?gene=3&amp;output=html">g.SYMBOL</a></td>
-            <td class="search"><a href="/search?gene=3&amp;output=html">g.SYMBOL</a></td>
-            <td class="search">NUMBER OF DATASETS</td>
-            <td class="search">
-            {% for d in DATASETS %}
-                <a href="/publications?id=DATASETID">DATASET NAME</a>,
-            {% endfor %}
-            </td>
-         </tr>
+        {%  for row in result_table %}
+            <tr class="search ">
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg0 }}</a></td>
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg1 }}</a></td>
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg2 }}</a></td>
+                <td class="search">{{ row.num_datasets }}</td>
+                <td class="search">
+                {% for d in row.datasets %}
+                    <a href="/publications?id={{ d.id }}">{{ d.name }}</a>,
+                {% endfor %}
+                </td>
+             </tr>
         {%  endfor  %}
         </tbody>
     </table>
 {% else %}
-    <p class=""> - NUMBER OF GENES SEARCHED gene(s) were not found in any IT-GED mouse datasets and do not match any HomoloGene ID for mouse. </p>
+    <p class=""> - {{ genes|length }} gene(s) were not found in any IT-GED mouse datasets and do not match any HomoloGene ID for mouse. </p>
 {% endif %}
 	<br><hr><strong>New dataset</strong>:

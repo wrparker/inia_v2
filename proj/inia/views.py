@@ -9,6 +9,7 @@ from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from inia.models import SpeciesType
+from functools import reduce
 
 
 import logging
@@ -27,14 +28,14 @@ def analysis_home(request):
 
 
 def analysis_multisearch(request):
-    genes, datasets, records = '', [], []
+    genes, result_table = '', []
     if request.method == "GET":
         pass
         # check file on id for data to load
     elif request.method == "POST":
         analysis_type = request.POST.get('type')
-        genes = [gene.lower() for gene in request.POST.get('allgenes').split(',')]
-        genes = set(genes) # Takes unique values
+        genes = request.POST.get('allgenes').split(',')
+        genes = set(genes)
 
         if request.POST.get('species') == 'mouse':
             species = SpeciesType.MUS_MUSCULUS
@@ -43,13 +44,24 @@ def analysis_multisearch(request):
         else:
             species = SpeciesType.HOMO_SAPIENS
         if analysis_type == 'multisearch':
-            for s in genes:
-                records.extend(IniaGene.objects.filter(gene_symbol__iexact=s,
-                                                       dataset__species=species))
-            for r in records:
-                datasets.append(r.dataset)
-            datasets = set(datasets)
-            num_datasets = len(datasets)
+            row, qset = {}, []
+            # generates a row for the result table for each search gene
+            for g in genes:
+                qset = IniaGene.objects.filter(gene_symbol__iexact=g)
+                hgenes = qset.first()
+                hgenes = hgenes.homologenes.all()
+
+                for c, h in enumerate(hgenes):
+                    # this gets the correct homologene symbol for each species for search gene 'g'
+                    sub_search = IniaGene.objects.filter(gene_symbol=h.gene_symbol, dataset__species=h.species).first()
+                    row['hg'+str(c)] = sub_search.gene_symbol if sub_search else '-'
+
+                datasets = []
+                for q in qset:
+                    datasets.append(q.dataset)
+                row['datasets'] = datasets
+                row['num_datasets'] = qset.count()
+                result_table.append(row)
         elif analysis_type == 'network':
             pass
         elif analysis_type == 'dataset':
@@ -57,7 +69,7 @@ def analysis_multisearch(request):
         else:
             pass
         # create file for data
-    return render(request, 'analysis_multisearch.html', {'genes': genes, 'datasets': datasets, 'records': records})
+    return render(request, 'analysis_multisearch.html', {'genes': genes, 'result_table': result_table})
 
 
 def about(request):
