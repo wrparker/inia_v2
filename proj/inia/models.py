@@ -112,6 +112,9 @@ class Dataset(models.Model):
     def get_number_genes(self):
         return len(self.iniagene_set.all())
 
+    class Meta:
+        ordering = ["name"]
+
 
 class Homologene(models.Model):
     '''This is basically just a lookup table that is populated by NCBI Homologene Database:

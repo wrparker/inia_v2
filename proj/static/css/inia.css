@@ -262,6 +262,16 @@ button{
     text-align:center;
 }
 
+button:hover{
+    color:black;
+    font-weight:bold;
+    background: #e5e5e5;
+  -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+     -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+          box-shadow: inset 0px 0px 5px #c1c1c1;
+   outline: none;
+}
+
 .ortholog-column{
     display: none;
 }
@@ -270,3 +280,22 @@ mark{
     background-color:yellow !important;
     font-weight:bold;
 }
+
+/* Booelean Dataset styles */
+.dataset-checkbox-title{
+    font-size: 1em;
+    margin-bottom: 0;
+    font-weight:bold;
+}
+
+.indented-dataset-parent{
+    margin-left:10px;
+}
+.indented-dataset-child{
+    margin-left:20px;
+}
+
+.boolean-dataset-form-button{
+    border-radius:0;
+}
+/* END */

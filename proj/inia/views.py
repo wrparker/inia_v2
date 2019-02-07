@@ -143,6 +143,17 @@ def search(request):
     else:
         return render(request, 'search.html', {'errors': errors})
 
+def boolean_dataset(request):
+
+    selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
+    if not request.GET.get('operation') or not selected_ds:
+        brain_regions = BrainRegion.objects.all().order_by('name')
+        publications = Publication.objects.all().order_by('-date_sub').prefetch_related('dataset_set')
+        return render(request, 'boolean_dataset.html', {'brain_regions': brain_regions,
+                                                        'publications': publications})
+    else:
+        results = True
+        return render(request, 'boolean_dataset.html', {'results': results})
 
 def dict_list_to_csv(dict_list):
     '''
