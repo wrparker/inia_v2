@@ -23,12 +23,11 @@
 </div>
 
 <script type="text/javascript" src="{% static "js/allgenesTitle.js" %}"></script>
-<p><strong>num of results</strong> result</p>
+<p><strong>{{ result_table|length }}</strong> result(s)</p>
 <div id="missingwrapper" class="small">
-    <p> - Genes marked with a (*) do not have a HomoloGene ID</p></div>
-    <br>
-{% if genes %}
-    <p class="small">Click a gene symbol to view detailed IT-GED information for that gene.</p>
+    <p>- Genes marked with a (*) do not have a HomoloGene ID<br/>
+{% if result_table %}
+    </p></div>Click a gene symbol to view detailed IT-GED information for that gene.
     <table class="search">
         <tbody>
         <tr class="alt">
@@ -44,7 +43,7 @@
                 <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg0 }}</a></td>
                 <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg1 }}</a></td>
                 <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg2 }}</a></td>
-                <td class="search">{{ row.num_datasets }}</td>
+                <td class="search">{{ row.datasets|length }}</td>
                 <td class="search">
                 {% for d in row.datasets %}
                     <a href="/publications?id={{ d.id }}">{{ d.name }}</a>,
@@ -55,6 +54,7 @@
         </tbody>
     </table>
 {% else %}
-    <p class=""> - {{ genes|length }} gene(s) were not found in any IT-GED mouse datasets and do not match any HomoloGene ID for mouse. </p>
+    - {{ genes|length }} gene(s) were not found in any IT-GED {{ request.POST.species }} datasets
+        and do not match any HomoloGene ID for {{ request.POST.species }}. </p></div>
 {% endif %}
 	<br><hr><strong>New dataset</strong>:

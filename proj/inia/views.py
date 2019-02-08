@@ -1,5 +1,6 @@
 import tempfile
 import csv
+import random
 from django.http import HttpResponse
 from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
@@ -28,39 +29,60 @@ def analysis_home(request):
 
 def analysis_multisearch(request):
     genes, result_table = '', []
-    if request.method == "GET":
-        pass
-        # check file on id for data to load
+    if request.method == 'GET' and 'id' in request.GET:
+        id = request.GET['id']
+        if id:
+            f = open(id+'.txt')
+            data = f.read
+            result_table = data  # there is no way in hell this will work
     elif request.method == "POST":
+        enum_idx = ''
         analysis_type = request.POST.get('type')
-        genes = request.POST.get('allgenes').split(',')
+        genes = [g.strip() for g in request.POST.get('allgenes').split(',')]
         genes = set(genes)
 
         if request.POST.get('species') == 'mouse':
             species = SpeciesType.MUS_MUSCULUS
+            enum_idx = '1'
         elif request.POST.get('species') == 'rat':
             species = SpeciesType.RATTUS_NORVEGICUS
+            enum_idx = '2'
         else:
             species = SpeciesType.HOMO_SAPIENS
+            enum_idx = '0'
         if analysis_type == 'multisearch':
-            row, qset = {}, []
             # generates a row for the result table for each search gene
             for g in genes:
+                row = {}
                 qset = IniaGene.objects.filter(gene_symbol__iexact=g)
                 hgenes = qset.first()
-                hgenes = hgenes.homologenes.all()
+                if hgenes:
+                    hgenes = hgenes.homologenes.all()
+                    if not hgenes:
+                        if qset.filter(dataset__species=species).first():  # fix this line
+                            row['hg'+enum_idx] = g+'*'
+                    else:
+                        for c, h in enumerate(hgenes):
+                            # this gets the correct homologene symbol for each species for search gene 'g'
+                            sub_search = IniaGene.objects.filter(gene_symbol=h.gene_symbol, dataset__species=h.species).first()
+                            row['hg'+str(c)] = sub_search.gene_symbol if sub_search else '-'
 
-                for c, h in enumerate(hgenes):
-                    # this gets the correct homologene symbol for each species for search gene 'g'
-                    sub_search = IniaGene.objects.filter(gene_symbol=h.gene_symbol, dataset__species=h.species).first()
-                    row['hg'+str(c)] = sub_search.gene_symbol if sub_search else '-'
+                    datasets, d_id = [], None
+                    for q in qset:
+                        if not d_id == q.dataset_id:
+                            datasets.append(q.dataset)
+                        d_id = q.dataset_id
+                    row['datasets'] = datasets
+                    result_table.append(row)
+            # this creates a session file for get requests
+            session_id = random.randint(10000000, 99999999)
+            f = None
+            while not f:
+                f = open("../tmp/"+str(session_id)+".txt", 'x')
+                session_id += 1
+            f.write(str(result_table))  # this does not write Dataset data correctly to the file
+            # write session_id as URL parameter
 
-                datasets = []
-                for q in qset:
-                    datasets.append(q.dataset)
-                row['datasets'] = datasets
-                row['num_datasets'] = qset.count()
-                result_table.append(row)
         elif analysis_type == 'network':
             pass
         elif analysis_type == 'dataset':
