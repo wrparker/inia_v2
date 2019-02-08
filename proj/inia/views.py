@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
+from functools import reduce
 
 
 import logging
@@ -143,6 +144,7 @@ def search(request):
     else:
         return render(request, 'search.html', {'errors': errors})
 
+
 def boolean_dataset(request):
 
     selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
@@ -152,7 +154,43 @@ def boolean_dataset(request):
         return render(request, 'boolean_dataset.html', {'brain_regions': brain_regions,
                                                         'publications': publications})
     else:
-        results = True
+        if request.GET.get('operation') == 'intersect':
+            qs = []
+            data_sets = request.GET.getlist('ds')
+            data_sets = [Dataset.objects.get(pk=ds) for ds in data_sets]
+
+            allowed_result = []
+            for ds in data_sets:
+                homologenes = set(ds.iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True))
+                if not allowed_result:
+                    allowed_result.extend(homologenes)
+                    allowed_result = set(allowed_result)
+                else:
+                    allowed_result &= homologenes
+            d_list = map(lambda n: Q(dataset=n), data_sets)
+            d_list = reduce(lambda a, b: a | b, d_list)
+
+            h_list = map(lambda n: Q(homologenes__homologene_group_id=str(n)), list(allowed_result))
+            h_list = reduce(lambda a, b: a | b, h_list)
+
+            genes = IniaGene.objects.filter(Q(h_list) & Q(d_list))
+            tmp = {}
+            no_homologene_genes = []
+            for gene in genes:
+                if not gene.get_homologene_id():
+                    no_homologene_genes.append(gene)
+                else:
+                    hgene_group_id = gene.get_homologene_id()
+                    if not tmp.get(hgene_group_id):
+                        tmp[hgene_group_id] = []
+                    tmp[hgene_group_id].append(gene)
+            results = []
+            # TODO: Leave off here... need to actually get the data ready for hte view... and process it now that
+            # TODO: the dictionary is grouing it by homologene ID  Also handle genes with no homologes.
+
+
+
+
         return render(request, 'boolean_dataset.html', {'results': results})
 
 def dict_list_to_csv(dict_list):

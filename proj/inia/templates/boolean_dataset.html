@@ -44,14 +44,54 @@
 
         </div>
 
-    <button name="operation" value="intersect" class="boolean-dataset-form-button">Intersect</button>
-    <button name="operation" value="union" class="boolean-dataset-form-button">Union</button>
+    <button name="operation" class="operation" value="intersect" class="boolean-dataset-form-button">Intersect</button>
+    <button name="operation" class="operation" value="union" class="boolean-dataset-form-button">Union</button>
     <br />
     <button name="clear" class="clear boolean-dataset-form-button">Clear all selections</button>
     </form>
-{% else %}
+{% elif request.GET.operation == 'intersect' %}
 
-    aaaahhh
+    <div class="table-responsive">
+        <table class="table result-table">
+            <tr>
+                <td class="col-name">Human</td>
+                <td class="col-name">Mouse</td>
+                <td class="col-name">Rat</td>
+                <td class="col-name">Per-dataset direction of change</td>
+                <td class="col-name">Overall direction of change</td>
+            </tr>
+            {% for key, val in results.items %}
+                {{ val }}
+            <tr>
+               <td>
+                   {{val.list_human_orthologs}}
+               </td>
+            <td>
+                {{val.list_list_mouse_orthologs}}
+            </td>
+            <td>
+                {{val.list_list_rat_orthologs}}
+            </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+{% elif request.GET.operation == 'union' %}
+    <div class="table-responsive">
+        <table class="table result-table">
+            <tr>
+                <td class="col-name">Human</td>
+                <td class="col-name">Mouse</td>
+                <td class="col-name">Rat</td>
+                <td class="col-name">Datasets</td>
+            </tr>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </table>
+    </div>
 
 {% endif %}
 {% endblock %}
@@ -63,7 +103,12 @@ $().ready(() => {
        $('.form-check-input').prop( "checked", false );
     });
 
+    $('.operation').on('click', (e) => {
+        $('.loading_main').show()
+    });
+
 });
+
 
 </script>
 {% endblock %}

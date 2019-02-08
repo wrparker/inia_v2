@@ -83,7 +83,7 @@
             <td>{% if not gene.ncbi_uid %}
                     -
                 {%  else %}
-                    <a target="_blank" href='https://www.ncbi.nlm.nih.gov/gene?term="{{gene.ncbi_uid}}"[uid]' >{{ gene.ncbi_uid }}
+                    <a target="_blank" href='https://www.ncbi.nlm.nih.gov/gene?term={{gene.ncbi_uid}}[uid]' >{{ gene.ncbi_uid }}
                     <i class="fa fa-external-link"></i>
                     </a>
                 {%  endif %}
@@ -178,7 +178,6 @@ $(document).ready(function(){
             $(this).mark(mark_val, search_mark_options)
         }
     });
-    //$('td').mark(mark_val, search_mark_options)
 });
 </script>
 {% endblock %}
