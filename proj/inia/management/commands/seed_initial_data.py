@@ -1,13 +1,49 @@
 from django.core.management.base import BaseCommand, CommandError
-from inia.models import Publication, IniaGene, Homologene, Dataset, GeneAliases, BrainRegion
+from inia.models import Publication, IniaGene, Homologene, Dataset, GeneAliases, BrainRegion, SpeciesType
 from datetime import datetime
 from multiprocessing.pool import ThreadPool as Pool
 import pandas as pd
 import os
 import logging
 import uuid
+import mygene
+from time import sleep
 
 _LOG = logging.getLogger('application.'+__name__)
+
+# Simultaneous http requests to mygene.info
+def gene_info_worker(gene):
+    mg = mygene.MyGeneInfo()
+    species = ''
+    if gene.dataset.species == SpeciesType.HOMO_SAPIENS:
+        species = 'human'
+    if gene.dataset.species == SpeciesType.MUS_MUSCULUS:
+        species = 'mouse'
+    if gene.dataset.species == SpeciesType.RATTUS_NORVEGICUS:
+        species = 'rat'
+    query = 'symbol:{}'.format(gene.gene_symbol)
+
+    result = mg.query(query, species=species)
+    if len(result['hits']) == 0:
+        _LOG.info("WARNING IT WAS 0, info: {}".format(result['hits']))
+    else:
+        for hit in result['hits']:
+            try:
+                if gene.ncbi_uid == None:
+                    gene.ncbi_uid = hit['entrezgene']
+                    gene.save()
+                    _LOG.info("Set entrezgene for {}:{} to {} .".format(gene.gene_symbol, species, hit['entrezgene']))
+                else:
+                    _LOG.info("ERROR!  Tried to replace ncbi_uid {} with {} for {}:{}".format(gene.ncbi_uid,
+                                                                                              hit['entrezgene'],
+                                                                                              gene.gene_symbol,
+                                                                                              species))
+                    gene.ncbi_uid = None
+                    gene.save()
+            except KeyError:
+                continue
+
+
 
 # move this out to a worker function so we can do this a little faster with threading.
 def add_gene_worker(values):
@@ -275,7 +311,9 @@ class Command(BaseCommand):
                     homologene_group_id=row['h_id'],
                     gene_symbol=row['genesymbol'].strip(),
                     species=species[str(row['tax_id'])],
-                    brain=(True if int(row['h_id']) in lines else False) )
+                    brain=(True if int(row['h_id']) in lines else False),
+                    ncbi_uid=row['enterez_id']
+                    )
                 )
             Homologene.objects.bulk_create(homologene_items)
             _LOG.info ("Success!")
@@ -294,9 +332,68 @@ class Command(BaseCommand):
                 pool.apply_async(add_gene_worker, (values,))
             pool.close()
             pool.join()
+
         else:
             _LOG.info("Skipping INIA genes since values already exist.")
 
+        _LOG.info("Adding ncbi_UIDs (enterez ids)")
+        needs_ncbi_uid = []
+        for i in IniaGene.objects.all().exclude(gene_symbol='').exclude(gene_symbol__isnull=True).exclude(ncbi_uid__isnull=False):
+            try:
+                i.ncbi_uid = i.homologenes.get(gene_symbol__iexact=i.gene_symbol, species=i.dataset.species).ncbi_uid
+                i.save()
+            except Homologene.DoesNotExist:
+                needs_ncbi_uid.append(i)
+            except Homologene.MultipleObjectsReturned:
+                for f in i.homologenes.filter(species=i.dataset.species):
+                    _LOG.info('{} {} {}'.format(f.gene_symbol, f.species, f.ncbi_uid))
+                exit(1)
+                #ncbi_uids = i.homologenes.filter(species=i.dataset.species).values_list('ncbi_uid', flat=True)
+                #if len(set(ncbi_uids)) == 1:
+
+
+        _LOG.info("QUERYING FOR INFO")
+        pool = Pool(10)
+        for gene in needs_ncbi_uid:
+            pool.apply_async(gene_info_worker, (gene,))
+        pool.close()
+        pool.join()
+
+        _LOG.info("Get UIDs stuff... no renamign done")
+        sleep(10)  # avoid overwhelming the API.
+
+        mg = mygene.MyGeneInfo()
+        for gene in IniaGene.objects.filter(ncbi_uid__isnull=True).exclude(gene_symbol='').exclude(gene_symbol__isnull=True):
+            species = ''
+            if gene.dataset.species == SpeciesType.HOMO_SAPIENS:
+                species = 'human'
+            if gene.dataset.species == SpeciesType.MUS_MUSCULUS:
+                species = 'mouse'
+            if gene.dataset.species == SpeciesType.RATTUS_NORVEGICUS:
+                species = 'rat'
+            result = mg.query('alias:{}'.format(gene.gene_symbol), species=species)
+            if len(result['hits']) == 0:
+                _LOG.debug("No hit found {}:{}".format(gene.gene_symbol, gene.dataset.species))
+            else:
+                for hit in result['hits']:
+                    try:
+                        if gene.ncbi_uid == None:
+                            gene.ncbi_uid = hit['entrezgene']
+                            gene.save()
+                            _LOG.info("Set entrezgene for ALIAS {}:{} to {} .".format(gene.gene_symbol, species,
+                                                                                hit['entrezgene']))
+                        else:
+                            _LOG.info("ERROR!  Tried to replace ncbi_uid {} with {} for {}:{} -- UNSETTING!".format(gene.ncbi_uid,
+                                                                                                      hit['entrezgene'],
+                                                                                                      gene.gene_symbol,
+                                                                                                      species))
+                            gene.ncbi_uid = None
+                            gene.save()
+                    except KeyError:
+                        continue
+
+        #TODO Discontinued genes/unfound genes with a gene symbol need to be populated.
+        _LOG.info("done!")
 
 
 def getGeneValues(genes_tsv):

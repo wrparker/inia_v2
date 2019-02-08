@@ -9,3 +9,4 @@ pandas==0.23.4
 django-recaptcha==1.4.0
 gunicorn==19.9.0
 psycopg2-binary==2.7.7
+mygene==3.1.0
