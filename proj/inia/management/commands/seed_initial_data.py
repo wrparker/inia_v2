@@ -392,8 +392,28 @@ class Command(BaseCommand):
                     except KeyError:
                         continue
 
-        #TODO Discontinued genes/unfound genes with a gene symbol need to be populated.
+        #TODO Discontinued genes/unfound genes with a gene symbol need to be populated, we need to handle unset genes here or osmething...
+        # TODO: manual inspection?
+         # ???
+
+        # Now lets fix any broken homologenes from update to new version.
+        no_homologene = IniaGene.objects.filter(gene_symbol__isnull=False).exclude(gene_symbol='').exclude(ncbi_uid__isnull=True)
+
+        for gene in no_homologene:
+            try:
+                hg = Homologene.objects.get(ncbi_uid=gene.ncbi_uid)
+                hgs = Homologene.objects.filter(homologene_group_id=hg.homologene_group_id)
+                gene.homologenes.add(*list(hgs))  # add them all.
+                _LOG.info('added {} to {} ({})'.format(hg.gene_symbol, gene.gene_symbol, gene.ncbi_uid))
+            except:
+                _LOG.info("no homologene found for uid {}".format(gene.ncbi_uid))
         _LOG.info("done!")
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 
 def getGeneValues(genes_tsv):

@@ -110,7 +110,7 @@ class Dataset(models.Model):
     alcohol = models.BooleanField()
 
     def get_number_genes(self):
-        return len(self.iniagene_set.all())
+        return self.iniagene_set.count()
 
     class Meta:
         ordering = ["name"]
@@ -175,7 +175,6 @@ class IniaGene(models.Model):  # Genes we do through experimentation
             return self.homologenes.first().homologene_group_id
         else:
              return ''
-     # some way to do coinverison here?
 
 
 class GeneAliases(models.Model):

@@ -50,7 +50,12 @@
     <button name="clear" class="clear boolean-dataset-form-button">Clear all selections</button>
     </form>
 {% elif request.GET.operation == 'intersect' %}
+    <p>You will receive dataset overlap statistics for intersection calculations involving exactly two datasets.</p>
 
+    <p> <strong>{{ results|length }}</strong> results for the <strong>intersection</strong> of the datasets: {{ dataset_names }}</p>
+    <p>(species of dataset is {{ intersection_species }})</p>
+
+    <h1> ADD INTERSECTION SCORE HERE!! TODO</h1>
     <div class="table-responsive">
         <table class="table result-table">
             <tr>
@@ -60,17 +65,22 @@
                 <td class="col-name">Per-dataset direction of change</td>
                 <td class="col-name">Overall direction of change</td>
             </tr>
-            {% for key, val in results.items %}
-                {{ val }}
+            {% for result in results%}
             <tr>
                <td>
-                   {{val.list_human_orthologs}}
+                   {{result.human}}
                </td>
             <td>
-                {{val.list_list_mouse_orthologs}}
+                {{result.mouse}}
             </td>
             <td>
-                {{val.list_list_rat_orthologs}}
+                {{result.rat}}
+            </td>
+            <td>
+                {{result.directions_per_dataset}}
+            </td>
+            <td>
+                {{result.overall_direction}}
             </td>
             </tr>
             {% endfor %}
