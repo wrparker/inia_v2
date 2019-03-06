@@ -146,9 +146,10 @@ def search(request):
 
 
 def boolean_dataset(request):
-    # TODO: Check if ds is a digit, if so, grab it by id, if not use the html name of publication to make a big
-    # TODO: dataset comprised of the smaller.
+    # TODO: dataset comprised of the smaller (fer2017, etc...)
+    # TODO: brain region filtering.
     selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
+    selected_br = [br for br in request.GET.getlist('br') if br != '']
     if not request.GET.get('operation') or not selected_ds:
         brain_regions = BrainRegion.objects.all().order_by('name')
         publications = Publication.objects.all().order_by('-date_sub').prefetch_related('dataset_set')
