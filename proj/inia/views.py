@@ -203,6 +203,7 @@ def boolean_dataset(request):
                 row['human'] = genes[0].list_human_orthologs()
                 row['mouse'] = genes[0].list_mouse_orthologs()
                 row['rat'] = genes[0].list_rat_orthologs()
+                row['homologene_id'] = h_id
 
                 # direction per dataset:
                 ds_directions = {}

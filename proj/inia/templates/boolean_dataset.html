@@ -68,16 +68,16 @@
             {% for result in results%}
             <tr>
                <td>
-                   {{result.human}}
+                   <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.human|default:'-'}}</a>
                </td>
             <td>
-                {{result.mouse}}
+                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.mouse|default:'-'}}</a>
             </td>
             <td>
-                {{result.rat}}
+                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.rat|default:'-'}}</a>
             </td>
             <td>
-                {{result.directions_per_dataset}}
+                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.directions_per_dataset}}</a>
             </td>
             <td>
                 {{result.overall_direction}}

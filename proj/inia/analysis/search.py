@@ -24,10 +24,30 @@ def base_gene_search(search, exclude_name=False):
     :return:
     '''
     search = strip_tags(search)
+
+    # if [HOMOLOGENE_ID] is in the search, lets just do search on hologoene
+    if '[HOMOLOGENE_ID]' in search:
+        search = search.split('[')[0].strip()  # should be an int.
+        try:
+            return IniaGene.objects.filter(homologenes__homologene_group_id=search).distinct()
+        except ValueError:
+            return IniaGene.objects.none()
+    # Simiarly, if [GENE_UNIQUE_ID] is in serach just do that.
+    if '[GENE_UNIQUE_ID]' in search:
+        search = search.split('[')[0].strip()  # should be an int.
+        try:
+            return IniaGene.objects.filter(ncbi_uid=search).distinct()
+        except ValueError:
+            return IniaGene.objects.none()
+
+    # Otherwise do other more general search.
+
     search_term_regex = "[^\\s\"']+|\"[^\"]*\"|'[^']*'"  # seaprate
     search_terms = [i.strip() for i in re.findall(search_term_regex, search)]
     search_terms = list(filter(None, search_terms))  # Remove blank strings.
     search_terms = [term.replace('"', "'") for term in search_terms]  # use single quote for all exacts for downstream simplicity
+
+
 
     # Lets build the query.
     results = IniaGene.objects.none()

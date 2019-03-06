@@ -7,7 +7,7 @@
     <br />
     <form id="search_form" action="{% url 'inia:search' %}" method="get" />
         <input type="hidden" name="output" value="html" />
-        Query:<input class='gene-query' type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" />
+    Query:<input class='gene-query' type="text" name="gene" placeholder="ex: *AMCA 'ion channel'" value="{{ request.GET.gene }}" />
     <br />
         {% exclude_name_form_checkbox request %} <br />
     <div class="row">

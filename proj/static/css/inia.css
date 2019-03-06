@@ -205,6 +205,12 @@ footer{
 
 
 /* Search stuff */
+
+.gene-query{
+    width:100%;
+    height:40px;
+    font-size:1.2em;
+}
 .search-error{
     font-weight:bold;
     color:red;
