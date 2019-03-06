@@ -110,7 +110,10 @@ class Dataset(models.Model):
     alcohol = models.BooleanField()
 
     def get_number_genes(self):
-        return len(self.iniagene_set.all())
+        return self.iniagene_set.count()
+
+    class Meta:
+        ordering = ["name"]
 
 
 class Homologene(models.Model):
@@ -124,6 +127,7 @@ class Homologene(models.Model):
     updated_at = models.DateField(auto_now=True)
     species = models.CharField(choices=SpeciesType.SPECIES_CHOICES, max_length=255)
     brain = models.BooleanField()  # This is pre-determined by...
+    ncbi_uid = models.IntegerField(db_index=True, unique=True)
 
 
 class IniaGene(models.Model):  # Genes we do through experimentation
@@ -143,7 +147,7 @@ class IniaGene(models.Model):  # Genes we do through experimentation
 
 
     legacy_id = models.IntegerField(db_index=True)  # From version 1.
-    ncbi_uid = models.IntegerField(default=None, null=True)  # Not everyone has an ncbi_uid.
+    ncbi_uid = models.IntegerField(default=None, null=True)  # same as enterez id
     probe_id = models.CharField(max_length=255)  # Some kind of variable like LILMN_41111
     gene_symbol = models.CharField(max_length=255, blank=True)
     gene_name = models.CharField(max_length=255)
@@ -171,7 +175,6 @@ class IniaGene(models.Model):  # Genes we do through experimentation
             return self.homologenes.first().homologene_group_id
         else:
              return ''
-     # some way to do coinverison here?
 
 
 class GeneAliases(models.Model):
