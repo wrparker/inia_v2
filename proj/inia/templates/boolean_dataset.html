@@ -4,7 +4,7 @@
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
 <h2>Boolean Analysis of Datasets</h2>
-    <h4><a href="?{{ csv_url }}">Download CSV</a></h4>
+<p><a href="?{{ csv_url }}">Download CSV</a> <i class="fa fa-download"></i></p>
 
 {% if not results and not request.GET.operation %}
     <p>You will receive dataset overlap statistics for intersection calculations involving exactly two datasets.</p>
@@ -55,10 +55,39 @@
 
     <p> <strong>{{ results|length }}</strong> results for the <strong>intersection</strong> of the datasets: {{ dataset_names|default:'None Selected'}}</p>
     <p>You limited search to following brain regions: {{ brain_region_names|default:'None Selected' }}</p>
-    <p><a href="{% url 'inia:boolean_dataset' %}"><< New Search</a></p>
     {%  if results  %}
+
+        {% if intersection_stats %}
+        <div class="table-responsive">
+            <table class="table result-table">
+                <tr>
+                <td class="col-name">Hypergeometric Score</td>
+                <td class="col-name">Number of overlapping genes</td>
+                <td class="col-name">Genes in {{ intersection_stats.ds1_name|default:'-' }}</td>
+                <td class="col-name">Genes in {{ intersection_stats.ds2_name|default:'-' }}</td>
+                <td class="col-name">Genes in background</td>
+                </tr>
+                <tr>
+                    <td>
+                       {{intersection_stats.hypergeometric_score}}
+                    </td>
+                    <td>
+                          {{ results|length }}
+                    </td>
+                    <td>
+                          {{ intersection_stats.ds1_num }}
+                    </td>
+                    <td>
+                          {{ intersection_stats.ds2_num }}
+                    </td>
+                    <td>
+                        {{ intersection_stats.background}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+            {% endif %}
         <p>(species of dataset is {{ intersection_species }})</p>
-        <h1> ADD INTERSECTION SCORE HERE!! TODO</h1>
         <div class="table-responsive">
             <table class="table result-table">
                 <tr>
@@ -90,6 +119,8 @@
 
             </table>
         </div>
+     <p><a href="{% url 'inia:boolean_dataset' %}"><< New Search</a></p>
+
     {% endif %}
 
 {% elif request.GET.operation == 'union' %}
@@ -124,7 +155,10 @@
                 {% endfor %}
             </table>
         </div>
+    <p><a href="{% url 'inia:boolean_dataset' %}"><< New Search</a></p>
     {% endif %}
+
+
 
 {% endif %}
 {% endblock %}

@@ -34,7 +34,7 @@
     {% if not genes %}
         <p>Enter some values to search IT-GED.</p>
         {% else %}
-        <p>Dataset Summary | View Gene Network | Overrepresentation Analysis | <a href="?{{ urlencode }}">Download CSV</a></p>
+        <p>Dataset Summary | View Gene Network | Overrepresentation Analysis | <a href="?{{ urlencode }}">Download CSV <i class="fa fa-download"></i></a></p>
         <div class="pagination">
             <span class="step-links">
         {% if genes.has_previous %}

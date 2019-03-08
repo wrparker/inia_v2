@@ -5,7 +5,7 @@ from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
 from django.db.models import F, Q
 from django.core.paginator import Paginator
-from .models import Publication, Dataset, BrainRegion, IniaGene
+from .models import Publication, Dataset, BrainRegion, IniaGene, Homologene, SpeciesType
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from functools import reduce
@@ -146,7 +146,6 @@ def search(request):
 
 def boolean_dataset(request):
     # TODO: dataset comprised of the smaller (fer2017, etc...)
-    # TODO: brain region filtering.
     selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
     selected_br = [br for br in request.GET.getlist('br') if br != '']
     if not request.GET.get('operation') or not selected_ds or len(selected_ds) <= 1:
@@ -267,10 +266,24 @@ def boolean_dataset(request):
             csv_url['output'] = 'csv'
             csv_url = urlencode(csv_url, doseq=True)
 
+            # Stats table:
+            intersection_stats = {}
+            if operation == 'intersect' and data_sets.count() == 2:
+                intersection_stats['ds1_name'] = data_sets[0].name
+                intersection_stats['ds1_num'] = len(set(data_sets[0].iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+                intersection_stats['ds2_name'] = data_sets[1].name
+                intersection_stats['ds2_num'] = len(set(data_sets[1].iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+                # TODO: Figure out genes in background
+                intersection_stats['background'] = '???TODO: Figure out calc'
+                # TODO: Figure out hypergeometric score
+                intersection_stats['hypergeometric_score'] = '???TODO: Figure out calc'
+
+
             return render(request, 'boolean_dataset.html', {'results': results,
                                                             'dataset_names': dataset_names,
                                                             'brain_region_names': brain_region_names,
                                                             'intersection_species': intersection_species,
+                                                            'intersection_stats': intersection_stats,
                                                             'csv_url': csv_url})
 
 def dict_list_to_csv(dict_list):
