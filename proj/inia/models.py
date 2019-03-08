@@ -171,10 +171,10 @@ class IniaGene(models.Model):  # Genes we do through experimentation
                                                                                                      flat=True))
 
     def get_homologene_id(self):
-        if len(self.homologenes.all()):
+        try:
             return self.homologenes.first().homologene_group_id
-        else:
-             return ''
+        except:
+            return ''
 
 
 class GeneAliases(models.Model):

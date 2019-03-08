@@ -150,35 +150,60 @@ def boolean_dataset(request):
     # TODO: brain region filtering.
     selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
     selected_br = [br for br in request.GET.getlist('br') if br != '']
-    if not request.GET.get('operation') or not selected_ds:
+    if not request.GET.get('operation') or not selected_ds or len(selected_ds) <= 1:
         brain_regions = BrainRegion.objects.all().order_by('name')
         publications = Publication.objects.all().order_by('-date_sub').prefetch_related('dataset_set')
         return render(request, 'boolean_dataset.html', {'brain_regions': brain_regions,
                                                         'publications': publications})
     else:
-        if request.GET.get('operation') == 'intersect':
-            qs = []
-            data_sets = request.GET.getlist('ds')
-            data_sets = [Dataset.objects.get(pk=ds) for ds in data_sets]
+        data_sets = Dataset.objects.filter(pk__in=selected_ds).prefetch_related('iniagene_set')
+        brain_regions = [BrainRegion.objects.get(pk=br) for br in selected_br]
+        brain_region_names = ', '.join([br.name for br in brain_regions])
+        dataset_names = ', '.join([ds.name for ds in data_sets])
+        operation = request.GET.get('operation')
 
+        if operation:
+            qs = []
             allowed_result = []
             for ds in data_sets:
                 homologenes = set(ds.iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True))
-                if not allowed_result:
+                if not allowed_result:  #  initialize it.
                     allowed_result.extend(homologenes)
                     allowed_result = set(allowed_result)
                 else:
-                    allowed_result &= homologenes
+                    if operation == 'intersect':
+                        allowed_result &= homologenes
+                    elif operation == 'union':
+                        allowed_result |= homologenes
+                    if not allowed_result:
+                        return render(request, 'boolean_dataset.html', {'results': {},
+                                                                        'dataset_names': dataset_names,
+                                                                        'brain_region_names': brain_region_names,
+                                                                        'intersection_species': 'None'})
+
             d_list = map(lambda n: Q(dataset=n), data_sets)
             d_list = reduce(lambda a, b: a | b, d_list)
 
             h_list = map(lambda n: Q(homologenes__homologene_group_id=str(n)), list(allowed_result))
             h_list = reduce(lambda a, b: a | b, h_list)
 
-            genes = IniaGene.objects.filter(Q(h_list) & Q(d_list))
+            if selected_br:
+                br_list = map(lambda n: Q(dataset__brain_regions=n), brain_regions)
+                br_list = reduce(lambda a, b: a | b, br_list)
 
+            if not selected_br:
+                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list)).prefetch_related('homologenes')
+            else:
+                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list) & Q(br_list)).prefetch_related('homologenes')
+
+            if not genes:   # br filter caused no genes.
+                return render(request, 'boolean_dataset.html', {'results': {},
+                                                                'dataset_names': dataset_names,
+                                                                'brain_region_names': brain_region_names,
+                                                                'intersection_species': 'None'})
 
             intersection_species = None
+
             if len(set(genes.values_list('dataset__species', flat=True))) > 1:
                 intersection_species = 'mixed species'
             else:
@@ -187,18 +212,18 @@ def boolean_dataset(request):
             tmp = {}
             # Sort into a dictionary with homologene-id as key.
             for gene in genes:
-                if not gene.get_homologene_id():
+                hgene_group_id = gene.get_homologene_id()
+                if not hgene_group_id:
                     if not tmp.get(gene.probe_id): # use probe id since we don't have homologene...
                         tmp[gene.probe_id] = []
                     tmp[gene.probe_id].append(gene)
                 else:
-                    hgene_group_id = gene.get_homologene_id()
                     if not tmp.get(hgene_group_id):
                         tmp[hgene_group_id] = []
                     tmp[hgene_group_id].append(gene)
 
             results = []
-            for h_id, genes in tmp.items():
+            for h_id, genes in tmp.items():  # Result row.
                 row = {}
                 # Use first element to get the universal information...
                 row['human'] = genes[0].list_human_orthologs()
@@ -206,22 +231,27 @@ def boolean_dataset(request):
                 row['rat'] = genes[0].list_rat_orthologs()
                 row['homologene_id'] = h_id
 
-                # direction per dataset:
-                ds_directions = {}
-                for gene in genes:
-                    if not ds_directions.get(gene.dataset.name):
-                        ds_directions[gene.dataset.name] = gene.direction
-                    elif ds_directions[gene.dataset.name] != gene.direction:
-                        ds_directions[gene.dataset.name] = 'BOTH'
-                directions = [direction for dataset, direction in ds_directions.items()]
-                dataset_names = ', '.join(dataset for dataset, direction in ds_directions.items())
+                if operation == 'intersect':
+                    # direction per dataset:
+                    ds_directions = {}
+                    for gene in genes:
+                        if not ds_directions.get(gene.dataset.name):
+                            ds_directions[gene.dataset.name] = gene.direction
+                        elif ds_directions[gene.dataset.name] != gene.direction:
+                            ds_directions[gene.dataset.name] = 'BOTH'
+                    directions = [direction for dataset, direction in ds_directions.items()]
 
-                row['directions_per_dataset'] = ', '.join(directions)
-                if len(set(directions)) > 1:
-                    row['overall_direction'] = 'DIFF'
-                else:
-                    row['overall_direction'] = 'SAME'
+                    row['directions_per_dataset'] = ', '.join(directions)
+                    if len(set(directions)) > 1:
+                        row['overall_direction'] = 'DIFF'
+                    else:
+                        row['overall_direction'] = 'SAME'
+
+                elif operation == 'union':  # pubs per item
+                    row['datasets'] = ', '.join(set([gene.dataset.name for gene in genes]))
+
                 results.append(row)
+
             results = sorted(results, key=lambda k: k['human'])  # Sort by human key.
 
             if(request.GET.get('output') == 'csv'):
@@ -233,6 +263,7 @@ def boolean_dataset(request):
 
             return render(request, 'boolean_dataset.html', {'results': results,
                                                             'dataset_names': dataset_names,
+                                                            'brain_region_names': brain_region_names,
                                                             'intersection_species': intersection_species})
 
 def dict_list_to_csv(dict_list):

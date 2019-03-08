@@ -5,7 +5,7 @@
 <h2><strong>ANALYSIS</strong></h2>
 <h2>Boolean Analysis of Datasets</h2>
 
-{% if not results %}
+{% if not results and not request.GET.operation %}
     <p>You will receive dataset overlap statistics for intersection calculations involving exactly two datasets.</p>
     {% include '_abbreviation_info.html' %}
     <p>&nbsp;</p>
@@ -52,56 +52,78 @@
 {% elif request.GET.operation == 'intersect' %}
     <p>You will receive dataset overlap statistics for intersection calculations involving exactly two datasets.</p>
 
-    <p> <strong>{{ results|length }}</strong> results for the <strong>intersection</strong> of the datasets: {{ dataset_names }}</p>
-    <p>(species of dataset is {{ intersection_species }})</p>
-
-    <h1> ADD INTERSECTION SCORE HERE!! TODO</h1>
-    <div class="table-responsive">
-        <table class="table result-table">
-            <tr>
-                <td class="col-name">Human</td>
-                <td class="col-name">Mouse</td>
-                <td class="col-name">Rat</td>
-                <td class="col-name">Per-dataset direction of change</td>
-                <td class="col-name">Overall direction of change</td>
-            </tr>
-            {% for result in results%}
-            <tr>
-               <td>
-                   <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.human|default:'-'}}</a>
-               </td>
-            <td>
-                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.mouse|default:'-'}}</a>
-            </td>
-            <td>
-                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.rat|default:'-'}}</a>
-            </td>
-            <td>
-                <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.directions_per_dataset}}</a>
-            </td>
-            <td>
-                {{result.overall_direction}}
-            </td>
-            </tr>
-            {% endfor %}
-
-        </table>
-    </div>
-{% elif request.GET.operation == 'union' %}
-    <div class="table-responsive">
-        <table class="table result-table">
-            <tr>
-                <td class="col-name">Human</td>
-                <td class="col-name">Mouse</td>
-                <td class="col-name">Rat</td>
-                <td class="col-name">Datasets</td>
-            </tr>
-            <tr>
+    <p> <strong>{{ results|length }}</strong> results for the <strong>intersection</strong> of the datasets: {{ dataset_names|default:'None Selected'}}</p>
+    <p>You limited search to following brain regions: {{ brain_region_names|default:'None Selected' }}</p>
+    <p><a href="{% url 'inia:boolean_dataset' %}"><< New Search</a></p>
+    {%  if results  %}
+        <p>(species of dataset is {{ intersection_species }})</p>
+        <h1> ADD INTERSECTION SCORE HERE!! TODO</h1>
+        <div class="table-responsive">
+            <table class="table result-table">
+                <tr>
+                    <td class="col-name">Human</td>
+                    <td class="col-name">Mouse</td>
+                    <td class="col-name">Rat</td>
+                    <td class="col-name">Per-dataset direction of change</td>
+                    <td class="col-name">Overall direction of change</td>
+                </tr>
+                {% for result in results%}
+                <tr>
+                   <td>
+                       <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.human|default:'-'}}</a>
+                   </td>
                 <td>
+                    <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.mouse|default:'-'}}</a>
                 </td>
-            </tr>
-        </table>
-    </div>
+                <td>
+                    <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{result.rat|default:'-'}}</a>
+                </td>
+                <td>
+                    {{result.directions_per_dataset}}
+                </td>
+                <td>
+                    {{result.overall_direction}}
+                </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    {% endif %}
+
+{% elif request.GET.operation == 'union' %}
+        <p> <strong>{{ results|length }}</strong> results for the <strong>union</strong> of the datasets: {{ dataset_names|default:'None Selected'}}</p>
+        <p>You limited search to following brain regions: {{ brain_region_names|default:'None Selected' }}</p>
+        <p><a href="{% url 'inia:boolean_dataset' %}"><< New Search</a></p>
+    {%  if results  %}
+        <p>(species of dataset is {{ intersection_species }})</p>
+        <div class="table-responsive">
+            <table class="table result-table">
+                <tr>
+                    <td class="col-name">Human</td>
+                    <td class="col-name">Mouse</td>
+                    <td class="col-name">Rat</td>
+                    <td class="col-name">Datasets</td>
+                </tr>
+                {% for result in results%}
+                <tr>
+                    <td>
+                        <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html"> {{ result.human|default:'-' }}</a>
+                    </td>
+                <td>
+                    <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ result.mouse|default:'-' }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'inia:search' %}?gene={{ result.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ result.rat|default:'-' }}</a>
+                </td>
+                <td>
+                {{ result.datasets  }}
+                </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 
 {% endif %}
 {% endblock %}
