@@ -5,11 +5,12 @@ from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
 from django.db.models import F, Q
 from django.core.paginator import Paginator
-from .models import Publication, Dataset, BrainRegion, IniaGene, Homologene, SpeciesType
+from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
+from .analysis.intersect import hypergeometric_score
 from functools import reduce
-import scipy.stats as stats
+
 
 import logging
 
@@ -146,6 +147,7 @@ def search(request):
 
 def boolean_dataset(request):
     # TODO: dataset comprised of the smaller (fer2017, etc...)
+    # TODO: This should probably be refactored out into something more concise.
     selected_ds = [ds for ds in request.GET.getlist('ds') if ds != '']
     selected_br = [br for br in request.GET.getlist('br') if br != '']
     if not request.GET.get('operation') or not selected_ds or len(selected_ds) <= 1:
@@ -267,34 +269,12 @@ def boolean_dataset(request):
             csv_url = urlencode(csv_url, doseq=True)
 
             # Stats table:
-            intersection_stats = {}
             if operation == 'intersect' and data_sets.count() == 2:
-                intersection_stats['ds1_name'] = data_sets[0].name
-                intersection_stats['ds1_num'] = len(set(data_sets[0].iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
-                intersection_stats['ds2_name'] = data_sets[1].name
-                intersection_stats['ds2_num'] = len(set(data_sets[1].iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
-                # TODO: Figure out genes in background
-                ''' Okay the background is the number of "conversions" or homologenes for that species of the dataset for each species involved...
-                Only count 1x per homologene group id.  Species must be present in homologene to be considered background.
-                '''
-                background = Homologene.objects.filter(Q(species=data_sets[0].species) | Q(species=data_sets[1].species)).values_list('homologene_group_id', flat=True)
-                intersection_stats['background'] = len(set(background))
-                # TODO: Figure out hypergeometric score
-                # l = backgroud genes, k = genes in ds1, q = overlap, m = genes in ds2
-                # cat(formatC(phyper((q-1),m,(l-m),k,lower.tail=FALSE), digits=3, format="g", flag="#"));
-                # https://gist.github.com/crazyhottommy/67179a5f2925794a09d8#file-gene_sets_hypergeometric_test-py
-                # That was translated to python...
-                # params, (overlap - 1), background, ds1_size, ds2_sizee
-                intersection_stats['hypergeometric_score'] = stats.hypergeom.sf(len(results) - 1,
-                                                                                intersection_stats['background'],
-                                                                                intersection_stats['ds1_num'],
-                                                                                intersection_stats['ds2_num'])
-                intersection_stats['mark_score'] = intersection_stats['hypergeometric_score'] <= 0.05  # bool.
+                intersection_stats = hypergeometric_score(data_sets[0],
+                                                          data_sets[1],
+                                                          num_overlap=len(results),
+                                                          return_params_as_dict=True)
                 intersection_stats['hypergeometric_score'] = '{0:1.4g}'.format(intersection_stats['hypergeometric_score'])
-
-
-
-
             return render(request, 'boolean_dataset.html', {'results': results,
                                                             'dataset_names': dataset_names,
                                                             'brain_region_names': brain_region_names,
