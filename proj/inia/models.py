@@ -127,7 +127,7 @@ class Homologene(models.Model):
     updated_at = models.DateField(auto_now=True)
     species = models.CharField(choices=SpeciesType.SPECIES_CHOICES, max_length=255)
     brain = models.BooleanField()  # This is pre-determined by...
-    ncbi_uid = models.IntegerField(db_index=True, unique=True)
+    ncbi_uid = models.IntegerField(db_index=True, unique=True)  # Not same as iniagene i guess?
 
 
 class IniaGene(models.Model):  # Genes we do through experimentation
@@ -159,16 +159,13 @@ class IniaGene(models.Model):  # Genes we do through experimentation
     updated = models.DateTimeField(auto_now=True)
 
     def list_human_orthologs(self):
-        return ', '.join(self.homologenes.all().filter(species=SpeciesType.HOMO_SAPIENS).values_list('gene_symbol',
-                                                                                                     flat=True))
+        return ', '.join([h.gene_symbol for h in self.homologenes.all() if h.species == SpeciesType.HOMO_SAPIENS])
 
     def list_rat_orthologs(self):
-        return ', '.join(self.homologenes.all().filter(species=SpeciesType.RATTUS_NORVEGICUS).values_list('gene_symbol',
-                                                                                                          flat=True))
+        return ', '.join([h.gene_symbol for h in self.homologenes.all() if h.species == SpeciesType.RATTUS_NORVEGICUS])
 
     def list_mouse_orthologs(self):
-        return ', '.join(self.homologenes.all().filter(species=SpeciesType.MUS_MUSCULUS).values_list('gene_symbol',
-                                                                                                     flat=True))
+        return ', '.join([h.gene_symbol for h in self.homologenes.all() if h.species == SpeciesType.MUS_MUSCULUS])
 
     def get_homologene_id(self):
         try:

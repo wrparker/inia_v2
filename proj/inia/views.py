@@ -192,9 +192,9 @@ def boolean_dataset(request):
                 br_list = reduce(lambda a, b: a | b, br_list)
 
             if not selected_br:
-                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list)).prefetch_related('homologenes')
+                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list)).prefetch_related('homologenes', 'dataset')
             else:
-                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list) & Q(br_list)).prefetch_related('homologenes')
+                genes = IniaGene.objects.filter(Q(h_list) & Q(d_list) & Q(br_list)).prefetch_related('homologenes', 'dataset')
 
             if not genes:   # br filter caused no genes.
                 return render(request, 'boolean_dataset.html', {'results': {},
@@ -209,10 +209,15 @@ def boolean_dataset(request):
             else:
                 intersection_species = genes[0].dataset.species + ' only'
 
+
             tmp = {}
             # Sort into a dictionary with homologene-id as key.
             for gene in genes:
-                hgene_group_id = gene.get_homologene_id()
+                try:
+                    hgene_group_id = gene.homologenes.all()[0].homologene_group_id  # PREFETCHED!
+                except:
+                    hgene_group_id = None
+
                 if not hgene_group_id:
                     if not tmp.get(gene.probe_id): # use probe id since we don't have homologene...
                         tmp[gene.probe_id] = []
@@ -226,6 +231,7 @@ def boolean_dataset(request):
             for h_id, genes in tmp.items():  # Result row.
                 row = {}
                 # Use first element to get the universal information...
+
                 row['human'] = genes[0].list_human_orthologs()
                 row['mouse'] = genes[0].list_mouse_orthologs()
                 row['rat'] = genes[0].list_rat_orthologs()
