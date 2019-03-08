@@ -261,10 +261,16 @@ def boolean_dataset(request):
                 response['Content-Disposition'] = 'attachment; filename="results.csv"'
                 return response
 
+            csv_url = request.GET.urlencode()
+            csv_url = parse_qs(csv_url)
+            csv_url['output'] = 'csv'
+            csv_url = urlencode(csv_url, doseq=True)
+
             return render(request, 'boolean_dataset.html', {'results': results,
                                                             'dataset_names': dataset_names,
                                                             'brain_region_names': brain_region_names,
-                                                            'intersection_species': intersection_species})
+                                                            'intersection_species': intersection_species,
+                                                            'csv_url': csv_url})
 
 def dict_list_to_csv(dict_list):
     '''

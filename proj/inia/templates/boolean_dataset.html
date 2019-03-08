@@ -4,6 +4,7 @@
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
 <h2>Boolean Analysis of Datasets</h2>
+    <h4><a href="?{{ csv_url }}">Download CSV</a></h4>
 
 {% if not results and not request.GET.operation %}
     <p>You will receive dataset overlap statistics for intersection calculations involving exactly two datasets.</p>
