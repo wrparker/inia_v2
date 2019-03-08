@@ -93,10 +93,9 @@ def search(request):
                     errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
 
         genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
-        # Speed up queries.
-        # TODO: how can we make this more faster/effective with less queries.  
-        genes = genes.prefetch_related('dataset', 'homologenes', 'dataset__publication').all()
-        total_results = len(genes)
+        # TODO: how can we make this more faster/effective with less queries.
+        genes = genes.prefetch_related('dataset', 'homologenes', 'dataset__publication', 'genealiases_set', 'dataset__brain_regions').all()
+        total_results = genes.count()
         if output == 'html':
             # Only paginate HTML format.
             paginator = Paginator(genes, 100)
@@ -213,11 +212,7 @@ def boolean_dataset(request):
             tmp = {}
             # Sort into a dictionary with homologene-id as key.
             for gene in genes:
-                try:
-                    hgene_group_id = gene.homologenes.all()[0].homologene_group_id  # PREFETCHED!
-                except:
-                    hgene_group_id = None
-
+                hgene_group_id = gene.get_homologene_id()
                 if not hgene_group_id:
                     if not tmp.get(gene.probe_id): # use probe id since we don't have homologene...
                         tmp[gene.probe_id] = []

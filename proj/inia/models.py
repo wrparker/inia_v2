@@ -169,9 +169,9 @@ class IniaGene(models.Model):  # Genes we do through experimentation
 
     def get_homologene_id(self):
         try:
-            return self.homologenes.first().homologene_group_id
+            return self.homologenes.all()[0].homologene_group_id  # PREFETCHED!
         except:
-            return ''
+            return None
 
 
 class GeneAliases(models.Model):
