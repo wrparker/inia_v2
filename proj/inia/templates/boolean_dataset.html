@@ -69,7 +69,12 @@
                 </tr>
                 <tr>
                     <td>
-                       {{intersection_stats.hypergeometric_score}}
+                        {% if intersection_stats.mark_score %}
+                            <mark>{{intersection_stats.hypergeometric_score}}</mark>
+                        {% else %}
+                            {{intersection_stats.hypergeometric_score}}
+                        {% endif %}
+
                     </td>
                     <td>
                           {{ results|length }}
@@ -86,6 +91,7 @@
                 </tr>
             </table>
         </div>
+            <p class="small">*A highlighted score means score <= 0.05 </p>
             {% endif %}
         <p>(species of dataset is {{ intersection_species }})</p>
         <div class="table-responsive">

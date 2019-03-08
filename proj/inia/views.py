@@ -9,7 +9,7 @@ from .models import Publication, Dataset, BrainRegion, IniaGene, Homologene, Spe
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from functools import reduce
-
+import scipy.stats as stats
 
 import logging
 
@@ -274,9 +274,25 @@ def boolean_dataset(request):
                 intersection_stats['ds2_name'] = data_sets[1].name
                 intersection_stats['ds2_num'] = len(set(data_sets[1].iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
                 # TODO: Figure out genes in background
-                intersection_stats['background'] = '???TODO: Figure out calc'
+                ''' Okay the background is the number of "conversions" or homologenes for that species of the dataset for each species involved...
+                Only count 1x per homologene group id.  Species must be present in homologene to be considered background.
+                '''
+                background = Homologene.objects.filter(Q(species=data_sets[0].species) | Q(species=data_sets[1].species)).values_list('homologene_group_id', flat=True)
+                intersection_stats['background'] = len(set(background))
                 # TODO: Figure out hypergeometric score
-                intersection_stats['hypergeometric_score'] = '???TODO: Figure out calc'
+                # l = backgroud genes, k = genes in ds1, q = overlap, m = genes in ds2
+                # cat(formatC(phyper((q-1),m,(l-m),k,lower.tail=FALSE), digits=3, format="g", flag="#"));
+                # https://gist.github.com/crazyhottommy/67179a5f2925794a09d8#file-gene_sets_hypergeometric_test-py
+                # That was translated to python...
+                # params, (overlap - 1), background, ds1_size, ds2_sizee
+                intersection_stats['hypergeometric_score'] = stats.hypergeom.sf(len(results) - 1,
+                                                                                intersection_stats['background'],
+                                                                                intersection_stats['ds1_num'],
+                                                                                intersection_stats['ds2_num'])
+                intersection_stats['mark_score'] = intersection_stats['hypergeometric_score'] <= 0.05  # bool.
+                intersection_stats['hypergeometric_score'] = '{0:1.4g}'.format(intersection_stats['hypergeometric_score'])
+
+
 
 
             return render(request, 'boolean_dataset.html', {'results': results,
