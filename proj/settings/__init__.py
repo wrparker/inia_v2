@@ -214,3 +214,15 @@ elif ENVIRONMENT == 'qa':
 
 elif ENVIRONMENT == 'prod':
     from .local_prod import *
+
+# Sentry error reporting.
+
+if os.getenv('SENTRY_DSN', None):
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()]
+    )
+
