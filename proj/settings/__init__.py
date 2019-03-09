@@ -216,8 +216,8 @@ elif ENVIRONMENT == 'prod':
     from .local_prod import *
 
 # Sentry error reporting.
-
-if os.getenv('SENTRY_DSN', None):
+SENTRY_DSN = os.getenv('SENTRY_DSN', None)
+if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
