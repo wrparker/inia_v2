@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from .models import Publication, Dataset, BrainRegion, IniaGene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
-from .analysis.intersect import hypergeometric_score
+from .analysis.intersect import hypergeometric_score, format_hypergeometric_score
 from functools import reduce
 
 
@@ -274,13 +274,15 @@ def boolean_dataset(request):
                                                           data_sets[1],
                                                           num_overlap=len(results),
                                                           return_params_as_dict=True)
-                intersection_stats['hypergeometric_score'] = '{0:1.4g}'.format(intersection_stats['hypergeometric_score'])
+                intersection_stats['hypergeometric_score'] = format_hypergeometric_score(intersection_stats['hypergeometric_score'])
             return render(request, 'boolean_dataset.html', {'results': results,
                                                             'dataset_names': dataset_names,
                                                             'brain_region_names': brain_region_names,
                                                             'intersection_species': intersection_species,
                                                             'intersection_stats': intersection_stats,
                                                             'csv_url': csv_url})
+def dataset_network(request):
+    return render(request, '_dataset_matrix.html')
 
 def dict_list_to_csv(dict_list):
     '''

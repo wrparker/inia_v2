@@ -61,4 +61,8 @@ def hypergeometric_score(dataset1, dataset2, num_overlap=False, return_params_as
         return intersection_stats
 
 
+def format_hypergeometric_score(score):
+    return '{0:1.4g}'.format(score)
+
+
 
