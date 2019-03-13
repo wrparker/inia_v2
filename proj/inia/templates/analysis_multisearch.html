@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2><strong>ANALYSIS</strong></h2>
+{% if genes %}
+    {% include '_multisearch_top.html' %}
+{% else %}
+    <h2 class="nomargin">Multiple Gene Analysis</h2>
+    <br>
+    <noscript><p class="small info">
+        Except for network analysis, all IT-GED features work with JavaScript disabled.
+        However, turning on JavaScript will provide for a better experience.
+    </p></noscript>
+    <p><strong>Multiple Gene Search</strong>:
+        Search for multiple genes in IT-GED simultaneously and generate a summary table of those genes.</p>
+    <p><strong>Gene Network</strong>:
+        Visualize the interactions between genes (see details <a href="/help#network">here</a>).</p>
+    <p><strong>Overrepresentation (Enrichment) Analysis</strong>:
+        Compare your dataset with those in IT-GED to find the ones that most closely match.</p>
+    <p><strong>Dataset Network</strong>: See where your dataset fits in among the IT-GED datasets.</p>
+    <br>
+{% endif %}
+<form name="allgenesform" id="allgenesform" class="analysis" method="post" action="">
+	{% csrf_token %}
+    <label>Type of analysis: </label>
+	<input type="radio" name="type" value="multisearch" id="typesearch" onchange="agSelect()" checked="checked">
+	<label for="typesearch">Multiple Gene Search</label>
+
+	<input type="radio" name="type" value="network" id="typenetwork" onchange="agSelect()">
+	<label for="typenetwork">Gene Network</label>
+
+	<input type="radio" name="type" value="dataset" id="typedata" onchange="agSelect()">
+	<label for="typedata">Overrepresentation</label>
+
+	<input type="radio" name="type" value="datasetnetwork" id="typedatasetnetwork" onchange="agSelect()">
+	<label for="typesearch">Dataset Network</label>
+
+	<p id="typeintro" class="small hidden">
+        Search for multiple genes in IT-GED simultaneously and generate a summary table of those genes.</p>
+	<p class="small jsoff" style="display: none;">
+        Javascript needs to be enabled to display a network, but you may still download the source files.</p>
+
+	<div id="titleWrap">
+	    <br>
+		<label for="title">Title for this dataset (optional, can be added/edited later): </label>
+		<input name="title" id="title" type="text" value="">
+		<br>
+	</div>
+
+	<div id="speciesWrap">
+		<label for="species">Species: </label>
+		<select name="species" id="species" style="font-size:smaller">
+		<option value="mouse">Mouse</option><option value="rat">Rat</option><option value="human">Human</option>		</select>
+		<br>
+	</div>
+	<label for="allgenes">Genes:<br><span class="small">
+        Enter or paste a list of gene symbols separated by whitespace (spaces, tabs, or newlines) and/or , | + </span></label><br>
+    <textarea name="allgenes" id="allgenes" cols="60" rows="9"></textarea>
+	<br>
+	<br>
+
+	<!--Select between all or custom datasets; default is ALL or whatever the network was made with-->
+	<!--If select custom, then show options-->
+	<!--datasetSelWrap is shown for network analysis with js on only-->
+	<div id="datasetSelWrap" class="hidden">
+		<label>Datasets: </label>
+		<input type="radio" name="customDatasetRadio" value="all" id="datasetAll" onchange="agdSelect()">
+		<label for="datasetAll">All datasets</label>
+		<input type="radio" name="customDatasetRadio" value="custom" id="datasetCustom" onchange="agdSelect()">
+		<label for="datasetCustom">Select custom datasets...</label>
+		<br>
+		<!--fieldset is shown when user selects custom-->
+		<fieldset id="datasetSelFS" class="hidden">
+            <div id="datasetSelLeft">
+                <p><strong>Datasets</strong></p>
+                <input type="checkbox" name="publication" id="fer2017" class="pubCheck" onclick="clearColor(); selectPubDatasets('fer2017')">
+                <label for="fer2017" id="fer2017Label" class="pubCheckLabel">Ferguson et al, 2017</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_AccC" id="fer2017none_AccC"
+                       class="fer2017 pub:fer2017 none_AccC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_AccC', 'fer2017none_AccC'); clearPub('fer2017')">
+                <label for="fer2017none_AccC" class="datasetCheckLabel fer2017 pub:fer2017 none_AccC ">fer2017none_AccC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_AccSh" id="fer2017none_AccSh"
+                       class="fer2017 pub:fer2017 none_AccSh  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_AccSh', 'fer2017none_AccSh'); clearPub('fer2017')">
+                <label for="fer2017none_AccSh" class="datasetCheckLabel fer2017 pub:fer2017 none_AccSh ">fer2017none_AccSh</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_BA" id="fer2017none_BA"
+                       class="fer2017 pub:fer2017 none_BA  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_BA', 'fer2017none_BA'); clearPub('fer2017')">
+                <label for="fer2017none_BA" class="datasetCheckLabel fer2017 pub:fer2017 none_BA ">fer2017none_BA</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_BNST" id="fer2017none_BNST"
+                       class="fer2017 pub:fer2017 none_BNST  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_BNST', 'fer2017none_BNST'); clearPub('fer2017')">
+                <label for="fer2017none_BNST" class="datasetCheckLabel fer2017 pub:fer2017 none_BNST ">fer2017none_BNST</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_CA" id="fer2017none_CA"
+                       class="fer2017 pub:fer2017 none_CA  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_CA', 'fer2017none_CA'); clearPub('fer2017')">
+                <label for="fer2017none_CA" class="datasetCheckLabel fer2017 pub:fer2017 none_CA ">fer2017none_CA</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_FC" id="fer2017none_FC"
+                       class="fer2017 pub:fer2017 none_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_FC', 'fer2017none_FC'); clearPub('fer2017')">
+                <label for="fer2017none_FC" class="datasetCheckLabel fer2017 pub:fer2017 none_FC ">fer2017none_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="fer2017none_VTA" id="fer2017none_VTA"
+                       class="fer2017 pub:fer2017 none_VTA  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_VTA', 'fer2017none_VTA'); clearPub('fer2017')">
+                <label for="fer2017none_VTA" class="datasetCheckLabel fer2017 pub:fer2017 none_VTA ">fer2017none_VTA</label>
+                <br><br>
+
+                <input type="checkbox" name="publication" id="kim2007" class="pubCheck"
+                       onclick="clearColor(); selectPubDatasets('kim2007')">
+                <label for="kim2007" id="kim2007Label" class="pubCheckLabel">Kimpel et al, 2007</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="kim2007none_Acc" id="kim2007none_Acc"
+                       class="kim2007 pub:kim2007 none_Acc  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_Acc', 'kim2007none_Acc'); clearPub('kim2007')">
+                <label for="kim2007none_Acc" class="datasetCheckLabel kim2007 pub:kim2007 none_Acc ">kim2007none_Acc</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="kim2007none_Amy" id="kim2007none_Amy"
+                       class="kim2007 pub:kim2007 none_Amy  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_Amy', 'kim2007none_Amy'); clearPub('kim2007')">
+                <label for="kim2007none_Amy" class="datasetCheckLabel kim2007 pub:kim2007 none_Amy ">kim2007none_Amy</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="kim2007none_FC" id="kim2007none_FC"
+                       class="kim2007 pub:kim2007 none_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_FC', 'kim2007none_FC'); clearPub('kim2007')">
+                <label for="kim2007none_FC" class="datasetCheckLabel kim2007 pub:kim2007 none_FC ">kim2007none_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="kim2007none_Hip" id="kim2007none_Hip"
+                       class="kim2007 pub:kim2007 none_Hip  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_Hip', 'kim2007none_Hip'); clearPub('kim2007')">
+                <label for="kim2007none_Hip" class="datasetCheckLabel kim2007 pub:kim2007 none_Hip ">kim2007none_Hip</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="kim2007none_WB" id="kim2007none_WB"
+                       class="kim2007 pub:kim2007 none_WB  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_WB', 'kim2007none_WB'); clearPub('kim2007')">
+                <label for="kim2007none_WB" class="datasetCheckLabel kim2007 pub:kim2007 none_WB ">kim2007none_WB</label>
+                <br><br>
+
+                <input type="checkbox" name="publication" id="mul2006" class="pubCheck"
+                       onclick="clearColor(); selectPubDatasets('mul2006')">
+                <label for="mul2006" id="mul2006Label" class="pubCheckLabel">Mulligan et al, 2006</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2006none_WB" id="mul2006none_WB"
+                       class="mul2006 pub:mul2006 none_WB  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('none_WB', 'mul2006none_WB'); clearPub('mul2006')">
+                <label for="mul2006none_WB" class="datasetCheckLabel mul2006 pub:mul2006 none_WB ">mul2006none_WB</label>
+                <br><br>
+
+                <input type="checkbox" name="publication" id="mul2011" class="pubCheck"
+                       onclick="clearColor(); selectPubDatasets('mul2011')">
+                <label for="mul2011" id="mul2011Label" class="pubCheckLabel">Mulligan et al, 2011</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_Cer" id="mul2011DID_Cer"
+                       class="mul2011 pub:mul2011 DID_Cer  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_Cer', 'mul2011DID_Cer'); clearPub('mul2011')">
+                <label for="mul2011DID_Cer" class="datasetCheckLabel mul2011 pub:mul2011 DID_Cer ">mul2011DID_Cer</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_FC" id="mul2011DID_FC"
+                       class="mul2011 pub:mul2011 DID_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_FC', 'mul2011DID_FC'); clearPub('mul2011')">
+                <label for="mul2011DID_FC" class="datasetCheckLabel mul2011 pub:mul2011 DID_FC ">mul2011DID_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_Hip" id="mul2011DID_Hip"
+                       class="mul2011 pub:mul2011 DID_Hip  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_Hip', 'mul2011DID_Hip'); clearPub('mul2011')">
+                <label for="mul2011DID_Hip" class="datasetCheckLabel mul2011 pub:mul2011 DID_Hip ">mul2011DID_Hip</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_OB" id="mul2011DID_OB"
+                       class="mul2011 pub:mul2011 DID_OB  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_OB', 'mul2011DID_OB'); clearPub('mul2011')">
+                <label for="mul2011DID_OB" class="datasetCheckLabel mul2011 pub:mul2011 DID_OB ">mul2011DID_OB</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_Str" id="mul2011DID_Str"
+                       class="mul2011 pub:mul2011 DID_Str  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_Str', 'mul2011DID_Str'); clearPub('mul2011')">
+                <label for="mul2011DID_Str" class="datasetCheckLabel mul2011 pub:mul2011 DID_Str ">mul2011DID_Str</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="mul2011DID_VM" id="mul2011DID_VM"
+                       class="mul2011 pub:mul2011 DID_VM  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_VM', 'mul2011DID_VM'); clearPub('mul2011')">
+                <label for="mul2011DID_VM" class="datasetCheckLabel mul2011 pub:mul2011 DID_VM ">mul2011DID_VM</label>
+                <br><br>
+
+                <input type="checkbox" name="publication" id="ost2013" class="pubCheck"
+                       onclick="clearColor(); selectPubDatasets('ost2013')">
+                <label for="ost2013" id="ost2013Label" class="pubCheckLabel">Osterndorff-Kahanek et al., 2013</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="ost2013chronic_FC" id="ost2013chronic_FC"
+                       class="ost2013 pub:ost2013 chronic_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('chronic_FC', 'ost2013chronic_FC'); clearPub('ost2013')">
+                <label for="ost2013chronic_FC" class="datasetCheckLabel ost2013 pub:ost2013 chronic_FC ">ost2013chronic_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="ost2013DID_FC" id="ost2013DID_FC"
+                       class="ost2013 pub:ost2013 DID_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('DID_FC', 'ost2013DID_FC'); clearPub('ost2013')">
+                <label for="ost2013DID_FC" class="datasetCheckLabel ost2013 pub:ost2013 DID_FC ">ost2013DID_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="ost2013EOD_FC" id="ost2013EOD_FC"
+                       class="ost2013 pub:ost2013 EOD_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('EOD_FC', 'ost2013EOD_FC'); clearPub('ost2013')">
+                <label for="ost2013EOD_FC" class="datasetCheckLabel ost2013 pub:ost2013 EOD_FC ">ost2013EOD_FC</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="ost2013LPS_FC" id="ost2013LPS_FC"
+                       class="ost2013 pub:ost2013 LPS_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('LPS_FC', 'ost2013LPS_FC'); clearPub('ost2013')">
+                <label for="ost2013LPS_FC" class="datasetCheckLabel ost2013 pub:ost2013 LPS_FC ">ost2013LPS_FC</label>
+                <br><br>
+
+                <input type="checkbox" name="publication" id="pon2012" class="pubCheck"
+                       onclick="clearColor(); selectPubDatasets('pon2012')">
+                <label for="pon2012" id="pon2012Label" class="pubCheckLabel">Ponomarev et al, 2012</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="pon2012CIA_BA" id="pon2012CIA_BA"
+                       class="pon2012 pub:pon2012 CIA_BA  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('CIA_BA', 'pon2012CIA_BA'); clearPub('pon2012')">
+                <label for="pon2012CIA_BA" class="datasetCheckLabel pon2012 pub:pon2012 CIA_BA ">pon2012CIA_BA</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="pon2012CIA_CA" id="pon2012CIA_CA"
+                       class="pon2012 pub:pon2012 CIA_CA  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('CIA_CA', 'pon2012CIA_CA'); clearPub('pon2012')">
+                <label for="pon2012CIA_CA" class="datasetCheckLabel pon2012 pub:pon2012 CIA_CA ">pon2012CIA_CA</label>
+                <br>
+
+                <input type="checkbox" name="datasetCheck[]" value="pon2012CIA_FC" id="pon2012CIA_FC"
+                       class="pon2012 pub:pon2012 CIA_FC  datasetCheck indent "
+                       onclick="clearColor(); clearBrainRegion('CIA_FC', 'pon2012CIA_FC'); clearPub('pon2012')">
+                <label for="pon2012CIA_FC" class="datasetCheckLabel pon2012 pub:pon2012 CIA_FC ">pon2012CIA_FC</label>
+                <br><br>
+
+                <!--buttons for clearing all and selecting all the datasets-->
+                <input type="button" class="searchSubmit" name="setDataset" value="Select all"
+                    onclick="if (confirm('Are you sure you want to select all the datasets?')){
+                                $('.datasetCheck').prop('checked', true);
+                             }"><br>
+                <input type="button" class="searchSubmit" name="clearDataset" value="Clear all"
+                    onclick="if (confirm('Are you sure you want to clear all the datasets?')){
+                                $('.datasetCheck').prop('checked', false);
+                                $('.pubCheck').prop('checked', false);
+                                clearBrains();
+                             }">
+            </div>
+	        <div id="datasetSelRight" class="json" style="display: block;">
+		        <strong>Brain Regions</strong>
+					<br>
+                <input type="checkbox" name="brainCheck" value="Accumbens" id="Acc" class="brainCheck"
+                       onclick="selectPubsInRegion('Acc')">
+                <label for="Acc" id="AccLabel" class="brainCheckLabel">Accumbens</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Amygdala" id="Amy" class="brainCheck"
+                       onclick="selectPubsInRegion('Amy')">
+                <label for="Amy" id="AmyLabel" class="brainCheckLabel">Amygdala			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Basolateral Amygdala" id="BA" class="brainCheck"
+                       onclick="selectPubsInRegion('BA')">
+                <label for="BA" id="BALabel" class="brainCheckLabel">Basolateral Amygdala			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Central Amygdala" id="CA" class="brainCheck"
+                       onclick="selectPubsInRegion('CA')">
+                <label for="CA" id="CALabel" class="brainCheckLabel">Central Amygdala			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Cerebellum" id="Cer" class="brainCheck"
+                       onclick="selectPubsInRegion('Cer')">
+                <label for="Cer" id="CerLabel" class="brainCheckLabel">Cerebellum			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Frontal Cortex" id="FC" class="brainCheck"
+                       onclick="selectPubsInRegion('FC')">
+                <label for="FC" id="FCLabel" class="brainCheckLabel">Frontal Cortex			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Hippocampus" id="Hip" class="brainCheck"
+                       onclick="selectPubsInRegion('Hip')">
+                <label for="Hip" id="HipLabel" class="brainCheckLabel">Hippocampus			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Olfactory Bulb" id="OB" class="brainCheck"
+                       onclick="selectPubsInRegion('OB')">
+                <label for="OB" id="OBLabel" class="brainCheckLabel">Olfactory Bulb			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Striatum/Accumbens" id="S_A" class="brainCheck"
+                       onclick="selectPubsInRegion('S_A')">
+                <label for="S_A" id="S_ALabel" class="brainCheckLabel">Striatum/Accumbens			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Striatum" id="Str" class="brainCheck"
+                       onclick="selectPubsInRegion('Str')">
+                <label for="Str" id="StrLabel" class="brainCheckLabel">Striatum			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Ventral Midbrain" id="VM" class="brainCheck"
+                       onclick="selectPubsInRegion('VM')">
+                <label for="VM" id="VMLabel" class="brainCheckLabel">Ventral Midbrain			</label>
+                        <br>
+                <input type="checkbox" name="brainCheck" value="Whole Brain" id="WB" class="brainCheck"
+                       onclick="selectPubsInRegion('WB')">
+                <label for="WB" id="WBLabel" class="brainCheckLabel">Whole Brain			</label>
+                        <br>
+	        </div>
+        </fieldset><br>
+	</div>
+	<p><input type="hidden" name="numDatasets" value="26"></p>
+    <p><input type="submit" class="searchSubmit" value="Submit">
+       <input type="button" class="searchSubmit json" name="clear" value="Clear list" style="display: inline-block;"
+           onclick="if (confirm('Are you sure you want to clear the form?')) {
+                        document.getElementById('allgenes').value='';
+                        document.getElementById('id').value='';}"
+       ></p>
+    <p><input type="submit" class="searchSubmit json" value="New Window"
+              onclick="this.form.target='_blank'" style="display: inline-block;"></p>
+</form>
+
+<script type="text/javascript">
+	// select between network/dataset text
+	// if network, give the option of all/custom datasets
+	// FYI ag = all genes
+	function agSelect() {
+		if (document.getElementById('typenetwork').checked)
+		{
+			$('#typeintro').html("Visualize the interactions between genes (see details <a href='/help#network'>here</a>).");
+			$('#datasetSelWrap').slideDown();
+			$('#speciesWrap').slideDown();
+			$('#titleWrap').slideDown();
+			if (!document.getElementById('datasetCustom').checked)
+			{
+				$('#datasetAll').prop('checked', true);
+				$('#datasetSelFS').slideUp();
+			}
+			else
+			{
+				$('#datasetSelFS').slideDown();
+			}
+		}
+		else
+		{
+			$('#datasetSelWrap').slideUp();
+			if (document.getElementById('typedata').checked)
+			{
+				$('#typeintro').html("Compare your dataset with those in IT-GED to find the ones that most closely match.");
+				//$('#speciesWrap').slideDown();
+				//$('#titleWrap').slideDown();
+			}
+			else if (document.getElementById('typesearch').checked)
+			{
+				$('#typeintro').html("Search for multiple genes in IT-GED simultaneously and generate a summary table of those genes.");
+				//$('#speciesWrap').slideUp();
+				//$('#titleWrap').slideUp();
+			}
+			else
+			{
+				$('#typeintro').html("See where your dataset fits in among the IT-GED datasets.");
+				//$('#speciesWrap').slideUp();
+				//$('#titleWrap').slideUp();
+			}
+
+		}
+	}
+
+	// select between custom and all datasets
+	// FYI agd = all genes datasets
+	agdSelect();
+	function agdSelect() {
+		clearColor();
+		if (document.getElementById('datasetAll').checked)
+		{
+			$('#datasetSelFS').slideUp();
+		}
+		if (document.getElementById('datasetCustom').checked)
+		{
+			$('#datasetSelFS').slideDown();
+		}
+	}
+</script>
+
+<script type="text/javascript" src="{% static "js/datasetSelect.js" %}"></script>
+
+    </div>
+
+{% endblock %}

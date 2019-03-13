@@ -1,0 +1,60 @@
+{% load static %}
+<h2 class="nomargin">Multiple Gene Search (Dataset Summary)</h2>
+<div class="outputLinksAnalysis">
+    <strong>Dataset Summary</strong> |
+    <a href="">Gene Network</a> |
+    <a href="">Overrepresentation Analysis</a> |
+    <a href="">Dataset Network</a>
+	<p class="small analysis">
+        <a href="">Download CSV</a>
+        <a class="" href="/help#csv" target="_blank">
+            <img src="images/info.png" alt="?"></a>
+    </p>
+</div>
+<p class="hidden datasetLoading small" style="display: none;">Loading... <img src="/images/spinner2.gif" alt="Loading..."></p>
+<script type="text/javascript">
+	$(".datasetLoading").show();
+</script>
+<br>
+<noscript><h4>id here</h4></noscript>
+<div id="agTitleWrapper">
+	<div id="agTitleInfo" class="" onclick="$('#agTitle').focus()" style="display: none;">
+	</div>
+</div>
+
+<script type="text/javascript" src="{% static "js/allgenesTitle.js" %}"></script>
+<p><strong>{{ result_table|length }}</strong> result(s)</p>
+<div id="missingwrapper" class="small">
+    <p>- Genes marked with a (*) do not have a HomoloGene ID<br/>
+{% if result_table %}
+    </p></div>Click a gene symbol to view detailed IT-GED information for that gene.
+    <table class="search">
+        <tbody>
+        <tr class="alt">
+            <td class="search head">Gene Symbol (human)</td>
+            <td class="search head">Gene Symbol (mouse)</td>
+            <td class="search head">Gene Symbol (rat)</td>
+            <td class="search head">Number of different datasets</td>
+            <td class="search head">Datasets</td>
+        </tr>
+        <!-- generate tr for each gene symbol -->
+        {%  for row in result_table %}
+            <tr class="search ">
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg0 }}</a></td>
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg1 }}</a></td>
+                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg2 }}</a></td>
+                <td class="search">{{ row.datasets|length }}</td>
+                <td class="search">
+                {% for d in row.datasets %}
+                    <a href="/publications?id={{ d.id }}">{{ d.name }}</a>,
+                {% endfor %}
+                </td>
+             </tr>
+        {%  endfor  %}
+        </tbody>
+    </table>
+{% else %}
+    - {{ genes|length }} gene(s) were not found in any IT-GED {{ request.POST.species }} datasets
+        and do not match any HomoloGene ID for {{ request.POST.species }}. </p></div>
+{% endif %}
+	<br><hr><strong>New dataset</strong>:
