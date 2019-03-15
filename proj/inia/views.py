@@ -1,3 +1,4 @@
+import os
 import tempfile
 import csv
 import random
@@ -6,10 +7,12 @@ from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render
 from django.db.models import F, Q
 from django.core.paginator import Paginator
+from django.conf import settings
 from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from .analysis.intersect import hypergeometric_score, format_hypergeometric_score
+from .analysis.multisearch import multisearch_reults
 from functools import reduce
 
 import logging
@@ -31,57 +34,31 @@ def analysis_multisearch(request):
     genes, result_table = '', []
     if request.method == 'GET' and 'id' in request.GET:
         id = request.GET['id']
-        if id:
-            f = open(id+'.txt')
-            data = f.read
-            result_table = data  # there is no way in hell this will work
-    elif request.method == "POST":
-        enum_idx = ''
-        analysis_type = request.POST.get('type')
-        genes = [g.strip() for g in request.POST.get('allgenes').split(',')]
-        genes = set(genes)
+        try:
+            if id:
+                f = open(id+'.txt')
+                data = f.read
+                result_table = data
+                f.close()
+        except FileNotFoundError as e:
+            _error = 'not found.'
 
+    elif request.method == "POST":
+        analysis_type = request.POST.get('type')
+        # No id have to do some crappy delimiting here.
+        genes = request.POST.get('allgenes')
+        genes = genes.replace('\r\n', ',').replace('\n', ',').replace('\r', ',').replace('|', ',').replace('+',',')
+        genes = [g.strip() for g in genes.split(',')]
         if request.POST.get('species') == 'mouse':
             species = SpeciesType.MUS_MUSCULUS
-            enum_idx = '1'
         elif request.POST.get('species') == 'rat':
             species = SpeciesType.RATTUS_NORVEGICUS
-            enum_idx = '2'
         else:
             species = SpeciesType.HOMO_SAPIENS
-            enum_idx = '0'
         if analysis_type == 'multisearch':
-            # generates a row for the result table for each search gene
-            for g in genes:
-                row = {}
-                qset = IniaGene.objects.filter(gene_symbol__iexact=g)
-                hgenes = qset.first()
-                if hgenes:
-                    hgenes = hgenes.homologenes.all()
-                    if not hgenes:
-                        if qset.filter(dataset__species=species).first():  # fix this line
-                            row['hg'+enum_idx] = g+'*'
-                    else:
-                        for c, h in enumerate(hgenes):
-                            # this gets the correct homologene symbol for each species for search gene 'g'
-                            sub_search = IniaGene.objects.filter(gene_symbol=h.gene_symbol, dataset__species=h.species).first()
-                            row['hg'+str(c)] = sub_search.gene_symbol if sub_search else '-'
+            result_table = multisearch_reults(genes, species=species)
 
-                    datasets, d_id = [], None
-                    for q in qset:
-                        if not d_id == q.dataset_id:
-                            datasets.append(q.dataset)
-                        d_id = q.dataset_id
-                    row['datasets'] = datasets
-                    result_table.append(row)
-            # this creates a session file for get requests
-            session_id = random.randint(10000000, 99999999)
-            f = None
-            while not f:
-                f = open("../tmp/"+str(session_id)+".txt", 'x')
-                session_id += 1
-            f.write(str(result_table))  # this does not write Dataset data correctly to the file
-            # write session_id as URL parameter
+
 
         elif analysis_type == 'network':
             pass
@@ -125,8 +102,8 @@ def datasets(request):
                                              'brain_regions': brain_regions})
 
 
-# This should ideally be refactored out into a proper API, but we need to provide legacy support...
-# THis is kind of ugly as is...
+# TODO: This should ideally be refactored out into a proper API, but we need to provide legacy support...
+# TODO: This is kind of ugly as is...
 def search(request):
     ''' Regex Values are allowed... separated by pipe?... it doesn't seem to work on normal'''
     output = request.GET.get('output', '')
@@ -161,7 +138,6 @@ def search(request):
                     errors.append(_err_msg.format(api_param, value, ', '.join(unique_vals)))
 
         genes = genes.order_by(F('gene_symbol').asc(nulls_last=True)) if genes else IniaGene.objects.none()
-        # TODO: how can we make this more faster/effective with less queries.
         genes = genes.prefetch_related('dataset', 'homologenes', 'dataset__publication', 'genealiases_set', 'dataset__brain_regions').all()
         total_results = genes.count()
         if output == 'html':
@@ -349,7 +325,8 @@ def boolean_dataset(request):
                                                             'intersection_stats': intersection_stats,
                                                             'csv_url': csv_url})
 def dataset_network(request):
-    return render(request, '_dataset_matrix.html')
+    brain_regions = BrainRegion.objects.all().order_by('name')
+    return render(request, 'dataset_network.html', {'brain_regions': brain_regions})
 
 def dict_list_to_csv(dict_list):
     '''

@@ -1,11 +1,14 @@
 from django import template
 from django.utils.safestring import mark_safe
+from inia.models import BrainRegion
 from inia.analysis.search import LegacyAPIHelper
 
 register = template.Library()
 
 @register.simple_tag(name='get_abbreviations')
 def get_abbreviations(brain_regions):
+    if not brain_regions:
+        brain_regions = BrainRegion.objects.all().order_by('name')
     return mark_safe(', '.join(['<strong>{}</strong>:{}'.format(i.abbreviation, i.name) for i in brain_regions]))
 
 @register.simple_tag(name='direction_tooltip')

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2><strong>ANALYSIS</strong></h2>
+<h2>DATASET NETWORK</h2>
+    {% include '_abbreviation_info.html' %}
+    <p>
+    Scroll down to add your dataset to the matrix and network.
+    </p>
+
+    <table class="table result-table">
+    {%  include '_dataset_matrix.html' %}
+    </table>
+
+{%  endblock %}

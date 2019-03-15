@@ -9,14 +9,14 @@ class SpeciesType(object):
     https://www.ncbi.nlm.nih.gov/Taxonomy
     '''
     UNKNOWN = 'UNKNOWN'
-    HOMO_SAPIENS = 'HOMO SAPIENS'  # Human tax id: 9606
-    MUS_MUSCULUS = 'MUS MUSCULUS'    # Mouse tax id: 10090
-    RATTUS_NORVEGICUS = 'RATTUS NORVEGICUS'  # Rat 10116
+    HOMO_SAPIENS = 'HOMO_SAPIENS'  # Human tax id: 9606
+    MUS_MUSCULUS = 'MUS_MUSCULUS'    # Mouse tax id: 10090
+    RATTUS_NORVEGICUS = 'RATTUS_NORVEGICUS'  # Rat 10116
 
     SPECIES_CHOICES = (
-        (HOMO_SAPIENS, 'HOMO SAPIENS'),
-        (MUS_MUSCULUS, 'MUS MUSCULUS'),
-        (RATTUS_NORVEGICUS, 'RATTUS NORVEGICUS')
+        (HOMO_SAPIENS, 'HOMO_SAPIENS'),
+        (MUS_MUSCULUS, 'MUS_MUSCULUS'),
+        (RATTUS_NORVEGICUS, 'RATTUS_NORVEGICUS')
     )
 
 

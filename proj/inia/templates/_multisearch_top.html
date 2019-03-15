@@ -8,10 +8,9 @@
 	<p class="small analysis">
         <a href="">Download CSV</a>
         <a class="" href="/help#csv" target="_blank">
-            <img src="images/info.png" alt="?"></a>
+            <i class="fa fa-download"></i></a>
     </p>
 </div>
-<p class="hidden datasetLoading small" style="display: none;">Loading... <img src="/images/spinner2.gif" alt="Loading..."></p>
 <script type="text/javascript">
 	$(".datasetLoading").show();
 </script>
@@ -28,22 +27,29 @@
     <p>- Genes marked with a (*) do not have a HomoloGene ID<br/>
 {% if result_table %}
     </p></div>Click a gene symbol to view detailed IT-GED information for that gene.
-    <table class="search">
+    <table class="table result-table">
         <tbody>
-        <tr class="alt">
-            <td class="search head">Gene Symbol (human)</td>
-            <td class="search head">Gene Symbol (mouse)</td>
-            <td class="search head">Gene Symbol (rat)</td>
-            <td class="search head">Number of different datasets</td>
-            <td class="search head">Datasets</td>
+        <tr>
+            <td class="col-name">Gene Symbol (human)</td>
+            <td class="col-name">Gene Symbol (mouse)</td>
+            <td class="col-name">Gene Symbol (rat)</td>
+            <td class="col-name">Number of different datasets</td>
+            <td class="col-name">Datasets</td>
         </tr>
         <!-- generate tr for each gene symbol -->
         {%  for row in result_table %}
             <tr class="search ">
-                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg0 }}</a></td>
-                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg1 }}</a></td>
-                <td class="search"><a href="/search?gene=3&amp;output=html">{{ row.hg2 }}</a></td>
-                <td class="search">{{ row.datasets|length }}</td>
+            {%  if row.homologene_id %}
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.HOMO_SAPIENS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.MUS_MUSCULUS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.RATTUS_NORVEGICUS }}</a></td>
+            {%  else %}
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.HOMO_SAPIENS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.MUS_MUSCULUS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.RATTUS_NORVEGICUS }}</a></td>
+            {% endif %}
+
+                <td class="search">{{ row.num_datasets }}</td>
                 <td class="search">
                 {% for d in row.datasets %}
                     <a href="/publications?id={{ d.id }}">{{ d.name }}</a>,

@@ -33,6 +33,9 @@ class Command(BaseCommand):
         data_sets = Dataset.objects.all().prefetch_related('iniagene_set').order_by('name')
         combinations = combinations(data_sets, 2)
         html += '<tr>'
+        html += '<td class="col-name">'
+        html += '-'  #  First column needs first row to be blank to make table align correctly.
+        html += '</td>'
         # header
         for ds in data_sets:
             html += '<td class="col-name">'

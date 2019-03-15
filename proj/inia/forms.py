@@ -29,6 +29,6 @@ class MultisearchForm(forms.Form):
     title = forms.CharField(widget=forms.Textarea(),
                 label='Title for this dataset (optional, can be added/edited later):')
     species = forms.ChoiceField(choices=SPECIES, label='Species:')
-    genes = forms.CharField(widget=forms.Textarea(), label="Genes:")
+    genes = forms.CharField(widget=forms.Textarea(), label="Genes:", required=True)
     datasets = forms.ChoiceField(choices=DATASETS, label='Datasets:',
                                  widget=forms.RadioSelect())

@@ -12,7 +12,7 @@
     of IT-GED datasets.
 </p>
 <p>
-    Use the <a href="#">Dataset Network tool</a> to see how the IT-GED datasets overlap in both table and network form, and add your custom dataset to the analysis.
+    Use the <a href="{% url 'inia:dataset_network' %}">Dataset Network tool</a> to see how the IT-GED datasets overlap in both table and network form, and add your custom dataset to the analysis.
 </p>
 <p style="text-align:center; border-top:solid 1px black">
     Jump to <a href="#data_by_region">datasets by brain region</a>.
@@ -33,7 +33,7 @@
         Paradigm: {{ pub.get_paradigm }}<br>
         Datasets from this publication:
         {% for ds in pub.dataset_set.all %}
-            <a href="#"><small>{{ ds.name }} ({{ ds.get_number_genes }})</a></small>
+            <a href="#"><small>{{ ds.name }} ({{ ds.get_number_genes }})</small></a>
                 {% if not forloop.last %}, {% endif %}
         {% endfor  %}
         <br><br>

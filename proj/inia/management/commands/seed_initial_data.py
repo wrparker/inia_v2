@@ -290,9 +290,9 @@ class Command(BaseCommand):
             _LOG.info("Dataset entries exist... skipping.")
         # Import homologenes
         species = {
-            '9606': 'HOMO SAPIENS',
-            '10090': 'MUS MUSCULUS',
-            '10116': 'RATTUS NORVEGICUS',
+            '9606': 'HOMO_SAPIENS',
+            '10090': 'MUS_MUSCULUS',
+            '10116': 'RATTUS_NORVEGICUS',
         }
         if not Homologene.objects.all():
             homologenes = pd.read_csv(_INIT_DATA_DIRECTORY.format('homologene_reduced.data'), sep='\t', engine='python')
@@ -454,11 +454,11 @@ def getGeneValues(genes_tsv):
 
         # Select Species...
         if value['species'].lower() == 'mouse':
-            value['species'] = 'MUS MUSCULUS'
+            value['species'] = 'MUS_MUSCULUS'
         elif value['species'].lower() == 'human':
-            value['species'] = 'HOMO SAPIENS'
+            value['species'] = 'HOMO_SAPIENS'
         elif value['species'].lower() == 'rat':
-            value['species'] = 'RATTUS NORVEGICUS'
+            value['species'] = 'RATTUS_NORVEGICUS'
 
         try:
             if value['pvalue']:  #Null ch eck
