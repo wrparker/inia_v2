@@ -1,4 +1,4 @@
-from inia.models import IniaGene, SpeciesType, Dataset
+from inia.models import IniaGene, SpeciesType, Dataset, Homologene
 
 def multisearch_reults(gene_symbols, species=None):
     '''
@@ -11,13 +11,20 @@ def multisearch_reults(gene_symbols, species=None):
     result_table = []
 
     # generates a row for the result table for each search gene
+    # TODO: Use Q filter instead of looping like this to reduce number of queries per input.
     for symbol in gene_symbols:
         row = {}
+        hgenes = Homologene.objects.filter(gene_symbol__iexact=symbol).prefetch_related('iniagene_set')
+        inia_hgene_set = set()
+        for hgene in hgenes:
+            inia_hgene_set |= set(hgene.iniagene_set.all())
+
         qset = IniaGene.objects.filter(gene_symbol__iexact=symbol,
                                        dataset__species=species).prefetch_related('homologenes', 'dataset').order_by('dataset__name',
                                                                                                                      'homologenes__gene_symbol')
+        qset = list(set(qset) | inia_hgene_set)
         if qset:
-            gene = qset.first()
+            gene = qset[0]
             datasets = [gene.dataset for gene in qset]
             if not gene.get_homologene_id():
                 if gene.ncbi_uid:
