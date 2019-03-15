@@ -1,8 +1,9 @@
 from inia.models import IniaGene, SpeciesType, Dataset, Homologene
 
-def multisearch_reults(gene_symbols, species=None):
+def multisearch_reults(gene_symbols, species=None, inia_genes_only=False):
     '''
     :param gene_symbols: list of gene symbols, string. Speices = Species.SpeciesType
+    :param inia_genes_only: when set to true, jsut returns the queryset instead of grouping.
     :return: Relevant genes across all datasets that match.  Grouped by homologene id as hg_idnum, also searches homologenes
     given a species.  If no species specified then homologenes can be whatever, free willie it.
     '''
@@ -12,6 +13,7 @@ def multisearch_reults(gene_symbols, species=None):
 
     # generates a row for the result table for each search gene
     # TODO: Use Q filter instead of looping like this to reduce number of queries per input.
+    # TODO: maybe serialize the actual results instead of re-running them woul dbe more effective?
     for symbol in gene_symbols:
         row = {}
         hgenes = Homologene.objects.filter(gene_symbol__iexact=symbol).prefetch_related('iniagene_set')
@@ -24,6 +26,8 @@ def multisearch_reults(gene_symbols, species=None):
                                                                                                                      'homologenes__gene_symbol')
         qset = list(set(qset) | inia_hgene_set)
         if qset:
+            if inia_genes_only:   # use this for things that use it for other things... ma
+                return qset
             gene = qset[0]
             datasets = [gene.dataset for gene in qset]
             if not gene.get_homologene_id():

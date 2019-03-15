@@ -1,4 +1,5 @@
 import os
+import json
 import tempfile
 import csv
 import random
@@ -31,34 +32,47 @@ def analysis_home(request):
 
 
 def analysis_multisearch(request):
-    genes, result_table = '', []
-    if request.method == 'GET' and 'id' in request.GET:
-        id = request.GET['id']
-        try:
-            if id:
-                f = open(id+'.txt')
-                data = f.read
-                result_table = data
-                f.close()
-        except FileNotFoundError as e:
-            _error = 'not found.'
+    genes, result_table, inputs = '', [], {}
+    if request.method == 'GET':
+        id = request.GET.get('id')
+        # Load in search inputs
+        if id:
+            inputs = open_tmp_search_file(id)
+            result_table = multisearch_reults(inputs['genes'], species=inputs['species'])
 
     elif request.method == "POST":
         analysis_type = request.POST.get('type')
         # No id have to do some crappy delimiting here.
         genes = request.POST.get('allgenes')
         genes = genes.replace('\r\n', ',').replace('\n', ',').replace('\r', ',').replace('|', ',').replace('+',',')
-        genes = [g.strip() for g in genes.split(',')]
+        genes = [g.strip() for g in genes.split(',') if g.strip()]
+
         if request.POST.get('species') == 'mouse':
             species = SpeciesType.MUS_MUSCULUS
         elif request.POST.get('species') == 'rat':
             species = SpeciesType.RATTUS_NORVEGICUS
         else:
             species = SpeciesType.HOMO_SAPIENS
+
+        # only store actual input.
+        if genes:
+            dataset_title = request.POST.get('title')
+
+            # Store input sin a temporary file...? Maybe move this out to db?
+            inputs = {'species': species,
+                      'genes': genes,
+                      'title': dataset_title,
+                      'id': str(random.randint(10000000,999999999999))}
+            # Make sure file doesn't exist... if does reassign ID.  Very unlikely in the first place.
+            while os.path.isfile(os.path.join(settings.PROJECT_DIR, 'tmp', inputs['id']+'.json')):
+                inputs['id'] = str(random.randint(10000000,999999999999))
+
+            with open(os.path.join(settings.PROJECT_DIR, 'tmp', inputs['id']+'.json'), 'w') as f:
+                f.write(json.dumps(inputs))
+
+
         if analysis_type == 'multisearch':
             result_table = multisearch_reults(genes, species=species)
-
-
 
         elif analysis_type == 'network':
             pass
@@ -67,7 +81,7 @@ def analysis_multisearch(request):
         else:
             pass
         # create file for data
-    return render(request, 'analysis_multisearch.html', {'genes': genes, 'result_table': result_table})
+    return render(request, 'analysis_multisearch.html', {'result_table': result_table, 'inputs': inputs})
 
 
 def about(request):
@@ -325,8 +339,27 @@ def boolean_dataset(request):
                                                             'intersection_stats': intersection_stats,
                                                             'csv_url': csv_url})
 def dataset_network(request):
+    inputs = {}
     brain_regions = BrainRegion.objects.all().order_by('name')
+    if request.POST.get('id'):
+        inputs = open_tmp_search_file(request.POST.get('id'))
+    elif request.GET.get('id'):
+        inputs = open_tmp_search_file(request.GET.get('id'))
+
+    if inputs:
+        genes = multisearch_reults(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+
     return render(request, 'dataset_network.html', {'brain_regions': brain_regions})
+
+def open_tmp_search_file(id):
+    inputs = {}
+    try:
+        with open(os.path.join(settings.PROJECT_DIR, 'tmp', id + '.json'), 'r') as f:
+            inputs = json.load(f)
+    except:
+        pass
+    return inputs
+
 
 def dict_list_to_csv(dict_list):
     '''

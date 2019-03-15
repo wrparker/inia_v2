@@ -40,13 +40,13 @@
         {%  for row in result_table %}
             <tr class="search ">
             {%  if row.homologene_id %}
-                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.HOMO_SAPIENS }}</a></td>
-                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.MUS_MUSCULUS }}</a></td>
-                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.RATTUS_NORVEGICUS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.HOMO_SAPIENS|default:'-' }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.MUS_MUSCULUS|default:'-' }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.homologene_id }}[HOMOLOGENE_ID]&output=html">{{ row.RATTUS_NORVEGICUS|default:'-' }}</a></td>
             {%  else %}
-                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.HOMO_SAPIENS }}</a></td>
-                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.MUS_MUSCULUS }}</a></td>
-                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.RATTUS_NORVEGICUS }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.HOMO_SAPIENS|default:'-' }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.MUS_MUSCULUS|default:'-' }}</a></td>
+                <td class="search"><a href="/search?gene={{ row.ncbi_uid_query }}&output=html">{{ row.RATTUS_NORVEGICUS|default:'-' }}</a></td>
             {% endif %}
 
                 <td class="search">{{ row.num_datasets }}</td>

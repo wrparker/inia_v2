@@ -3,7 +3,7 @@
 
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
-{% if genes %}
+{% if inputs %}
     {% include '_multisearch_top.html' %}
 {% else %}
     <h2 class="nomargin">Multiple Gene Analysis</h2>
@@ -44,24 +44,27 @@
 	<div id="titleWrap">
 	    <br>
 		<label for="title">Title for this dataset (optional, can be added/edited later): </label>
-		<input name="title" id="title" type="text" value="">
+		<input name="title" id="title" type="text" value="{{ inputs.title }}">
 		<br>
 	</div>
 
 	<div id="speciesWrap">
-		<label for="species">Species (used for stats): </label>
+		<label for="species">Species: </label>
 		<select name="species" id="species" style="font-size:smaller">
-		<option value="mouse">Mouse</option><option value="rat">Rat</option><option value="human">Human</option>		</select>
+		    <option value="mouse" {% if inputs.species == 'MUS_MUSCULUS' %} selected {% endif %}>Mouse</option>
+            <option value="rat" {% if inputs.species == 'RATTUS_NORVEGICUS' %}selected {% endif %}>Rat</option>
+            <option value="human"{% if inputs.species == 'HOMO_SAPIENS' %}selected {% endif %}>Human</option>
+        </select>
 		<br>
 	</div>
 	<label for="allgenes">Genes:<br><span class="small">
         Enter or paste a list of gene symbols separated by whitespace (spaces, tabs, or newlines) and/or , | + </span></label><br>
-    <textarea name="allgenes" id="allgenes" cols="60" rows="9"></textarea>
+    <textarea name="allgenes" id="allgenes" cols="60" rows="9">{% if inputs %}{{ inputs.genes|join:"&#013;" }}{% endif %}</textarea>
 	<br>
 	<br>
 
 	<!--Select between all or custom datasets; default is ALL or whatever the network was made with-->
-	<!--If select custom, then show options-->
+	<!--If select custom, then show options-->`
 	<!--datasetSelWrap is shown for network analysis with js on only-->
 	<div id="datasetSelWrap" class="hidden">
 		<label>Datasets: </label>
