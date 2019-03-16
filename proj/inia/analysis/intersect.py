@@ -1,7 +1,14 @@
 import scipy.stats as stats
 from django.db.models import Q
-from inia.models import Homologene, IniaGene
+from inia.models import Homologene, IniaGene, Dataset
 from functools import reduce
+
+
+# TODO: Backgroudn homologenes needs to be filtered further to only homologenes expressed in the brain.
+
+def bonferroni_factor():
+    num_datasets = Dataset.objects.all().count()
+    return (num_datasets * (num_datasets-1))/2
 
 
 def num_intersect_gene(dataset1, dataset2):
@@ -61,8 +68,37 @@ def hypergeometric_score(dataset1, dataset2, num_overlap=False, return_params_as
         return intersection_stats
 
 
+def custom_dataset_intersection (custom_genes, custom_species, dataset):
+    '''This takes in a queryset of genes rather than 2 datasets and gives calculations. '''
+    # TODO: FIx calculations here...
+    print (custom_genes.count())
+    intersect_stats = {}
+    bonferroni_adj = bonferroni_factor()
+    # only care about homoologenes as adjusted length.
+    genes_length = len(set(custom_genes.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+    background = len(set(Homologene.objects.filter(Q(species=custom_species) | Q(species=dataset.species)).values_list('homologene_group_id', flat=True)))
+    # Only overlapping homologenes, count only once.
+    num_overlap = len(set(custom_genes.filter(dataset=dataset).exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+    ds_len = len(set(dataset.iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+    intersect_stats['hypergeometric_score'] = stats.hypergeom.sf(num_overlap - 1, background, genes_length, ds_len)
+    intersect_stats['bonferroni'] = min(1, intersect_stats['hypergeometric_score']*bonferroni_factor())
+    intersect_stats['standard_dataset_length'] = ds_len
+    intersect_stats['custom_dataset_length'] = genes_length
+    intersect_stats['overlap'] = num_overlap
+    intersect_stats['background_homologenes'] = background
+    return intersect_stats
+
 def format_hypergeometric_score(score):
-    return '{0:1.4g}'.format(score)
+    if score < 0.01:
+        return '%.2e' % score
+    elif score < 0.1:
+        return '%.4f' % score
+    elif score < 1:
+        return '%.3f' % score
+    else:
+        return '%.2f' % score
+
+
 
 
 

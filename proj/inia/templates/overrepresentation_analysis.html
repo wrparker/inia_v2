@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+{% load inia_extras %}
+
+{% block content %}
+<h2><strong>ANALYSIS</strong></h2>
+<h2>Overrepresentation (Enrichment) Analysis</h2>
+    <div class="outputLinksAnalysis">
+    <a href="{% url 'inia:analysis_multisearch' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Summary</a> |
+    <a href="{% url 'inia:gene_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Gene Network</a> |
+    <strong>Overrepresentation Analysis</strong> |
+    <a href="{% url 'inia:dataset_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Network</a>
+	<p class="small analysis">
+        <a href="">Download CSV</a>
+        <a class="" href="/help#csv" target="_blank">
+            <i class="fa fa-download"></i></a>
+    </p>
+</div>
+    {% include '_abbreviation_info.html' %}
+    <p>
+    The Overrepresentation Analysis tool is used to determine whether a user-selected list of genes shows high overlap
+        with any IT-GED datasets. The hypergeometric score is a measure of the probability that the number of overlapping
+        genes would occur by chance, given the two dataset sizes (the user dataset and the IT-GED dataset), the size of
+        the overlap, and the size of the background. The tool is based on HomoloGene data. The columns are as follows:
+    <ul>
+    <li> <strong>IT-GED dataset:</strong> the IT-GED dataset against which the user data has been compared </li>
+    <li> <strong>Hypergeometric score:</strong>  the probability that the overlap would occur by chance  </li>
+    <li> <strong>Adjusted score:</strong>the adjusted hypergeometric score takes into account the number of comparisons. The score is highlighted if it is less than or equal to 0.0500  </li>
+    <li> <strong>Number of overlapping genes:</strong>  the number of genes that are found in both the IT-GED dataset and the user dataset and that have a HomoloGene ID assigned for the species given in both datasets   </li>
+    <li> <strong>Adjusted IT-GED dataset size:</strong> the number of genes in the IT-GED dataset that have a HomoloGene ID assigned for both the IT-GED dataset species and the user-selected species </li>
+    <li> <strong>Adjusted custom dataset size:</strong> the number of genes in the user dataset that have a HomoloGene ID assigned for both the IT-GED dataset species and the user-selected species </li>
+    <li> <strong>Background size:</strong> the number of genes that are expressed in the brain and that have a HomoloGene ID assigned for both the IT-GED dataset species and the user-selected species </li>
+    </ul>
+    </p>
+
+    <h3>{{ inputs.title}} Dataset ID: {{inputs.id }} ({{inputs.species}})</h3>
+    <p> This dataset matches <em>n=<strong>{{ inputs.custom_dataset_length }}</strong></em></p>
+
+    <table class="table result-table">
+    <tr>
+        <td class="col-name">IT-GED dataset</td>
+        <td class="col-name">Hypergeometric score (P(X ≥ k))</td>
+        <td class="col-name">Adjusted score (Bonferroni)</td>
+        <td class="col-name">Number of overlapping genes (k)</td>
+        <td class="col-name">Adjusted IT-GED dataset size (m)</td>
+        <td class="col-name"> Adjusted custom dataset size (n)</td>
+        <td class="col-name">Background size (N)</td>
+    </tr>
+    {% for result in result_table %}
+        <tr>
+            <td>{{result.IT_GED_dataset}}</td>
+            <td>{{result.hypergeometric_score}}</td>
+            <td>{% mark_pvalue result.adjusted_score %}</td>
+            <td>{{result.num_overlapping_genes}}</td>
+            <td>{{result.adjusted_itged_dataset_size}}</td>
+            <td>{{result.adjusted_custom_dataset_size}}</td>
+            <td>{{result.background_size}}</td>
+        </tr>
+    {% endfor %}
+        </table>
+        You can access this dataset for 48 hours using this link: <a href="{{ request.get_full_path }}">{{request.get_full_path }}</a>
+
+
+
+
+{%  endblock %}

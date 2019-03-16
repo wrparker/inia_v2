@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
+{% load inia_extras %}
 
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
 <h2>DATASET NETWORK</h2>
+    <div class="outputLinksAnalysis">
+    <a href="{% url 'inia:analysis_multisearch' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Summary</a> |
+    <a href="{% url 'inia:gene_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Gene Network</a> |
+    <a href="{% url 'inia:overrepresentation_analysis' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Overrepresentation Analysis</a> |
+    <strong>Dataset Network</strong>
+	<p class="small analysis">
+        <a href="">Download CSV</a>
+        <a class="" href="/help#csv" target="_blank">
+            <i class="fa fa-download"></i></a>
+    </p>
+</div>
     {% include '_abbreviation_info.html' %}
     <p>
     Scroll down to add your dataset to the matrix and network.
@@ -11,6 +23,18 @@
 
     <table class="table result-table">
     {%  include '_dataset_matrix.html' %}
+
+    {%  if inputs %}
+        <tr>
+        <td>{{ inputs.title|default:inputs.id }} ({{ inputs.species }})</td>
+        {%  for score in inputs.bonferonni %}
+        <td>
+            {%  mark_pvalue score %}
+        </td>
+        {% endfor %}
+        </tr>
+    {% endif %}
+
     </table>
     *Values shown are Bonferroni-adjusted p-values.
 

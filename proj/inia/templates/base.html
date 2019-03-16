@@ -144,11 +144,18 @@
     });
 
     $(".ortholog-toggle").click(function(e){
-        e.preventDefault()
+        e.preventDefault();
         $(".ortholog-column").each(function(){
             $(this).toggle();
         });
     });
+
+    $(".show-not-found").click(function(e){
+        e.preventDefault();
+        $('.not-found').each(function() {
+            $(this).toggle();
+        });
+  });
 </script>
 
 

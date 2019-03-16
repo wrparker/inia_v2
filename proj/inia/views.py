@@ -5,16 +5,18 @@ import csv
 import random
 from django.http import HttpResponse
 from urllib.parse import unquote, parse_qs, urlencode
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import F, Q
 from django.core.paginator import Paginator
 from django.conf import settings
-from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType
+from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType, Homologene
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
-from .analysis.intersect import hypergeometric_score, format_hypergeometric_score
-from .analysis.multisearch import multisearch_reults
+from .analysis.intersect import hypergeometric_score, format_hypergeometric_score, custom_dataset_intersection
+from .analysis.multisearch import multisearch_results
 from functools import reduce
+import scipy.stats as stats
+import numpy as np
 
 import logging
 
@@ -38,7 +40,7 @@ def analysis_multisearch(request):
         # Load in search inputs
         if id:
             inputs = open_tmp_search_file(id)
-            result_table = multisearch_reults(inputs['genes'], species=inputs['species'])
+            result_table, not_found = multisearch_results(inputs['genes'], species=inputs['species'])
 
     elif request.method == "POST":
         analysis_type = request.POST.get('type')
@@ -70,9 +72,11 @@ def analysis_multisearch(request):
             with open(os.path.join(settings.PROJECT_DIR, 'tmp', inputs['id']+'.json'), 'w') as f:
                 f.write(json.dumps(inputs))
 
-
+        # Don't ever do anything wiht post, just return redirect.
+        # add url to self...
+        id = urlencode({'id': inputs['id']})
         if analysis_type == 'multisearch':
-            result_table = multisearch_reults(genes, species=species)
+            return redirect(request.path_info+'?'+id)
 
         elif analysis_type == 'network':
             pass
@@ -81,7 +85,8 @@ def analysis_multisearch(request):
         else:
             pass
         # create file for data
-    return render(request, 'analysis_multisearch.html', {'result_table': result_table, 'inputs': inputs})
+    return render(request, 'analysis_multisearch.html', {'result_table': result_table, 'inputs': inputs,
+                                                         'not_found': not_found})
 
 
 def about(request):
@@ -341,15 +346,52 @@ def boolean_dataset(request):
 def dataset_network(request):
     inputs = {}
     brain_regions = BrainRegion.objects.all().order_by('name')
-    if request.POST.get('id'):
-        inputs = open_tmp_search_file(request.POST.get('id'))
-    elif request.GET.get('id'):
+    if request.GET.get('id'):
+        # TODO: Some duplicated code here...
+        data_sets = Dataset.objects.all().order_by('name').prefetch_related('iniagene_set')
         inputs = open_tmp_search_file(request.GET.get('id'))
+        genes = multisearch_results(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+        # order same way in generate_dataset_matrix to make table match up...
+        inputs['bonferonni'] = []
+        for ds in data_sets:
+            score = custom_dataset_intersection(genes, inputs['species'], ds)['bonferroni']
+            score = format_hypergeometric_score(score)
+            inputs['bonferonni'].append(score)
 
-    if inputs:
-        genes = multisearch_reults(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+    return render(request, 'dataset_network.html', {'brain_regions': brain_regions,
+                                                    'inputs': inputs})
+def gene_network(request):
+    return HttpResponse('hi')
 
-    return render(request, 'dataset_network.html', {'brain_regions': brain_regions})
+def overrepresentation_analysis(request):
+    # TODO: FIX THIS!!!
+    # homolgoene... defined search maybe to fix?  issue is with custom_dataset_intersect.
+    inputs = {}
+    result_table = []
+    if request.GET.get('id'):
+        inputs = open_tmp_search_file(request.GET.get('id'))
+        genes = multisearch_results(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+
+        data_sets = Dataset.objects.all().order_by('name')
+        inputs['custom_dataset_length'] = genes.distinct().count()
+
+        for ds in data_sets:
+            row = {}
+            intersect_result = custom_dataset_intersection(genes, inputs['species'], ds)
+            row['IT_GED_dataset'] = ds.name
+            row['hypergeometric_score'] = format_hypergeometric_score(intersect_result['hypergeometric_score'])
+            row['adjusted_score'] = format_hypergeometric_score(intersect_result['bonferroni'])
+            row['num_overlapping_genes'] = intersect_result['overlap']
+            row['adjusted_itged_dataset_size'] = intersect_result['standard_dataset_length']
+            row['adjusted_custom_dataset_size'] = intersect_result['custom_dataset_length']
+            row['background_size'] = intersect_result['background_homologenes']
+            result_table.append(row)
+    else:
+        return redirect('inia:analysis_multisearch')
+
+    result_table = sorted(result_table, key=lambda k: k['adjusted_score'])
+    return render(request, 'overrepresentation_analysis.html', {'inputs': inputs, 'result_table': result_table})
+
 
 def open_tmp_search_file(id):
     inputs = {}

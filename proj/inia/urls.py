@@ -31,5 +31,7 @@ urlpatterns = [
     re_path('^search/$', views.search, name='search'),
     re_path('^analysis/booleandataset/$', views.boolean_dataset, name='boolean_dataset'),
     re_path('^analysis/datasetnetwork/$', views.dataset_network, name='dataset_network'),
+    re_path('^analysis/genenetwork/$', views.gene_network, name='gene_network'),
+    re_path('^analysis/overrepresentation_analysis/$', views.overrepresentation_analysis, name='overrepresentation_analysis'),
 
 ]

@@ -5,7 +5,7 @@ from django.db.models import Q
 import logging
 import traceback
 from inia.models import Dataset
-from inia.analysis.intersect import hypergeometric_score, format_hypergeometric_score
+from inia.analysis.intersect import hypergeometric_score, format_hypergeometric_score, bonferroni_factor
 from itertools import combinations
 
 _LOG = logging.getLogger('application.'+__name__)
@@ -39,7 +39,7 @@ class Command(BaseCommand):
                 'for now datasets. #}\n\n'
         data_sets = Dataset.objects.all().prefetch_related('iniagene_set').order_by('name')
 
-        bonferroni_adjustment = (len(data_sets) * len(data_sets) - 1) /2
+        bonferroni_adjustment = bonferroni_factor()
 
         combinations = combinations(data_sets, 2)
         html += '<tr>'

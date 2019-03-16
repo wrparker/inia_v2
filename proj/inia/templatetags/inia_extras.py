@@ -5,6 +5,13 @@ from inia.analysis.search import LegacyAPIHelper
 
 register = template.Library()
 
+@register.simple_tag(name='mark_pvalue')
+def mark_pvalue(score):
+    if float(score) <= 0.05:
+        return mark_safe('<mark>{}</mark>'.format(score))
+    else:
+        return score
+
 @register.simple_tag(name='get_abbreviations')
 def get_abbreviations(brain_regions):
     if not brain_regions:

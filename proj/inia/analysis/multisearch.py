@@ -1,6 +1,6 @@
 from inia.models import IniaGene, SpeciesType, Dataset, Homologene
 
-def multisearch_reults(gene_symbols, species=None, inia_genes_only=False):
+def multisearch_results(gene_symbols, species=None, inia_genes_only=False):
     '''
     :param gene_symbols: list of gene symbols, string. Speices = Species.SpeciesType
     :param inia_genes_only: when set to true, jsut returns the queryset instead of grouping.
@@ -10,24 +10,27 @@ def multisearch_reults(gene_symbols, species=None, inia_genes_only=False):
 
     gene_symbols = set(gene_symbols)
     result_table = []
+    all_genes = IniaGene.objects.none()
+    not_found = []
 
     # generates a row for the result table for each search gene
     # TODO: Use Q filter instead of looping like this to reduce number of queries per input.
     # TODO: maybe serialize the actual results instead of re-running them woul dbe more effective?
     for symbol in gene_symbols:
         row = {}
-        hgenes = Homologene.objects.filter(gene_symbol__iexact=symbol).prefetch_related('iniagene_set')
-        inia_hgene_set = set()
+        # Specify species here is important.
+        hgenes = Homologene.objects.filter(gene_symbol__iexact=symbol, species=species).prefetch_related('iniagene_set')
+        inia_hgene_set = IniaGene.objects.none()
         for hgene in hgenes:
-            inia_hgene_set |= set(hgene.iniagene_set.all())
+            inia_hgene_set = inia_hgene_set.union(hgene.iniagene_set.all())
 
         qset = IniaGene.objects.filter(gene_symbol__iexact=symbol,
                                        dataset__species=species).prefetch_related('homologenes', 'dataset').order_by('dataset__name',
                                                                                                                      'homologenes__gene_symbol')
-        qset = list(set(qset) | inia_hgene_set)
+        qset = (qset.union(inia_hgene_set)).distinct()
+
+
         if qset:
-            if inia_genes_only:   # use this for things that use it for other things... ma
-                return qset
             gene = qset[0]
             datasets = [gene.dataset for gene in qset]
             if not gene.get_homologene_id():
@@ -53,5 +56,10 @@ def multisearch_reults(gene_symbols, species=None, inia_genes_only=False):
                 count += 1
             row['num_datasets'] = count
             result_table.append(row)
+            all_genes = all_genes.union(qset)
+        if not qset:
+            not_found.append(symbol)
     result_table = sorted(result_table, key=lambda k: k['num_datasets'], reverse=True)
-    return result_table
+    if inia_genes_only:
+        return all_genes.distinct()
+    return result_table, not_found

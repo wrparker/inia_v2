@@ -2,9 +2,9 @@
 <h2 class="nomargin">Multiple Gene Search (Dataset Summary)</h2>
 <div class="outputLinksAnalysis">
     <strong>Dataset Summary</strong> |
-    <a href="">Gene Network</a> |
-    <a href="">Overrepresentation Analysis</a> |
-    <a href="">Dataset Network</a>
+    <a href="{% url 'inia:gene_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Gene Network</a> |
+    <a href="{% url 'inia:overrepresentation_analysis' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Overrepresentation Analysis</a> |
+    <a href="{% url 'inia:dataset_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Network</a>
 	<p class="small analysis">
         <a href="">Download CSV</a>
         <a class="" href="/help#csv" target="_blank">
@@ -24,7 +24,14 @@
 <script type="text/javascript" src="{% static "js/allgenesTitle.js" %}"></script>
 <p><strong>{{ result_table|length }}</strong> result(s)</p>
 <div id="missingwrapper" class="small">
-    <p>- Genes marked with a (*) do not have a HomoloGene ID<br/>
+    <p>- Genes marked with a (*) do not have a HomoloGene ID</p>
+    <p>- {{ not_found|length }} were nto found in any IT-GED {{ inputs.species }} datasets and do not match any homologene
+    for {{ inputs.species }}.  <a href="#" class="show-not-found">Click to show</a></p>
+
+<div class="not-found">
+    {{ not_found|join:', ' }}
+</div>
+
 {% if result_table %}
     </p></div>Click a gene symbol to view detailed IT-GED information for that gene.
     <table class="table result-table">
@@ -59,6 +66,9 @@
         {%  endfor  %}
         </tbody>
     </table>
+    {% if inputs %}
+        Yoou can access this dataset for 48 hours here: <a href="{{ request.get_full_path }}">{{ request.get_full_path }}</a>
+    {% endif %}
 {% else %}
     - {{ genes|length }} gene(s) were not found in any IT-GED {{ request.POST.species }} datasets
         and do not match any HomoloGene ID for {{ request.POST.species }}. </p></div>
