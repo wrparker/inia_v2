@@ -11,7 +11,7 @@
     <strong>Overrepresentation Analysis</strong> |
     <a href="{% url 'inia:dataset_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Network</a>
 	<p class="small analysis">
-        <a href="">Download CSV</a>
+        <a href='{{ request.get_full_path }}&output=csv'>Download CSV</a>
         <a class="" href="/help#csv" target="_blank">
             <i class="fa fa-download"></i></a>
     </p>

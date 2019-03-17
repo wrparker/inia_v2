@@ -71,15 +71,29 @@ def hypergeometric_score(dataset1, dataset2, num_overlap=False, return_params_as
 def custom_dataset_intersection (custom_genes, custom_species, dataset):
     '''This takes in a queryset of genes rather than 2 datasets and gives calculations. '''
     # TODO: FIx calculations here...
-    print (custom_genes.count())
     intersect_stats = {}
     bonferroni_adj = bonferroni_factor()
     # only care about homoologenes as adjusted length.
-    genes_length = len(set(custom_genes.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+    genes = [gene for gene in custom_genes if gene.get('homologene_id', None) and gene.get(custom_species) and gene.get(dataset.species)]
+    genes_length = len(genes)
+
     background = len(set(Homologene.objects.filter(Q(species=custom_species) | Q(species=dataset.species)).values_list('homologene_group_id', flat=True)))
     # Only overlapping homologenes, count only once.
-    num_overlap = len(set(custom_genes.filter(dataset=dataset).exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
-    ds_len = len(set(dataset.iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
+    num_overlap = 0
+    for gene in genes:
+        if dataset in gene['datasets']:
+            num_overlap += 1
+    #  Number of genes in the IT-GED dataset that have a HomoloGene ID assigned for both the IT-GED dataset species and the user-selected species
+
+    ds_genes = IniaGene.objects.filter(dataset=dataset).exclude(homologenes=None).prefetch_related('homologenes')
+    ds_len = 0
+    for ds_gene in ds_genes:
+        hgenes = list(ds_gene.homologenes.all())
+        hgenes = [h.species for h in hgenes]
+        if custom_species in hgenes and dataset.species in hgenes:
+            ds_len += 1
+
+    #ds_len = len(set(dataset.iniagene_set.exclude(homologenes=None).values_list('homologenes__homologene_group_id', flat=True)))
     intersect_stats['hypergeometric_score'] = stats.hypergeom.sf(num_overlap - 1, background, genes_length, ds_len)
     intersect_stats['bonferroni'] = min(1, intersect_stats['hypergeometric_score']*bonferroni_factor())
     intersect_stats['standard_dataset_length'] = ds_len

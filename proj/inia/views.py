@@ -34,13 +34,15 @@ def analysis_home(request):
 
 
 def analysis_multisearch(request):
-    genes, result_table, inputs = '', [], {}
+    genes, result_table, inputs, not_found = '', [], {}, None
     if request.method == 'GET':
         id = request.GET.get('id')
         # Load in search inputs
         if id:
             inputs = open_tmp_search_file(id)
-            result_table, not_found = multisearch_results(inputs['genes'], species=inputs['species'])
+            result_table, not_found = multisearch_results(inputs['genes'],
+                                                          species=inputs['species'],
+                                                          return_not_found=True)
 
     elif request.method == "POST":
         analysis_type = request.POST.get('type')
@@ -350,7 +352,7 @@ def dataset_network(request):
         # TODO: Some duplicated code here...
         data_sets = Dataset.objects.all().order_by('name').prefetch_related('iniagene_set')
         inputs = open_tmp_search_file(request.GET.get('id'))
-        genes = multisearch_results(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+        genes = multisearch_results(inputs['genes'], species=inputs['species'])
         # order same way in generate_dataset_matrix to make table match up...
         inputs['bonferonni'] = []
         for ds in data_sets:
@@ -364,32 +366,38 @@ def gene_network(request):
     return HttpResponse('hi')
 
 def overrepresentation_analysis(request):
-    # TODO: FIX THIS!!!
-    # homolgoene... defined search maybe to fix?  issue is with custom_dataset_intersect.
     inputs = {}
     result_table = []
     if request.GET.get('id'):
         inputs = open_tmp_search_file(request.GET.get('id'))
-        genes = multisearch_results(inputs['genes'], species=inputs['species'], inia_genes_only=True)
+        genes  = multisearch_results(inputs['genes'], species=inputs['species'])
 
         data_sets = Dataset.objects.all().order_by('name')
-        inputs['custom_dataset_length'] = genes.distinct().count()
+        inputs['custom_dataset_length'] = len([gene for gene in genes if gene.get('homologene_id')])
 
         for ds in data_sets:
             row = {}
             intersect_result = custom_dataset_intersection(genes, inputs['species'], ds)
             row['IT_GED_dataset'] = ds.name
             row['hypergeometric_score'] = format_hypergeometric_score(intersect_result['hypergeometric_score'])
-            row['adjusted_score'] = format_hypergeometric_score(intersect_result['bonferroni'])
+            row['adjusted_score'] = intersect_result['bonferroni']
             row['num_overlapping_genes'] = intersect_result['overlap']
             row['adjusted_itged_dataset_size'] = intersect_result['standard_dataset_length']
             row['adjusted_custom_dataset_size'] = intersect_result['custom_dataset_length']
             row['background_size'] = intersect_result['background_homologenes']
             result_table.append(row)
+        if request.GET.get('output') == 'csv':
+            result_file = dict_list_to_csv(result_table)
+            response = HttpResponse(content=open(result_file, 'rb'))
+            response['Content-Type'] = 'text'
+            response['Content-Disposition'] = 'attachment; filename="results.csv"'
+            return response
     else:
         return redirect('inia:analysis_multisearch')
 
     result_table = sorted(result_table, key=lambda k: k['adjusted_score'])
+    for result in result_table:
+        result['adjusted_score'] = format_hypergeometric_score(result['adjusted_score'])
     return render(request, 'overrepresentation_analysis.html', {'inputs': inputs, 'result_table': result_table})
 
 
