@@ -363,7 +363,7 @@ def dataset_network(request):
     return render(request, 'dataset_network.html', {'brain_regions': brain_regions,
                                                     'inputs': inputs})
 def gene_network(request):
-    return HttpResponse('hi')
+    return render(request, 'gene_network.html', {})
 
 def overrepresentation_analysis(request):
     inputs = {}
