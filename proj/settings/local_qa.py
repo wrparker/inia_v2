@@ -1,7 +1,8 @@
 import sys
 globals().update(vars(sys.modules["settings"]))
 
-ALLOWED_HOSTS += ['iniav2-qa.herokuapp.com']
+ALLOWED_HOSTS += ['iniav2-qa.herokuapp.com',
+		  'inia.nmtechgroup.com']
 
 DEBUG = True
 DATABASES = {
