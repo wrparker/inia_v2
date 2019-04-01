@@ -2,6 +2,7 @@
 models.py contains the ORM structure and programmable database structure.
 '''
 from django.db import models
+from django.contrib.postgres.fields import JSONField  # We're stuck to postgres now.
 
 
 class SpeciesType(object):
@@ -180,3 +181,8 @@ class GeneAliases(models.Model):
     '''
     symbol = models.CharField(max_length=255)
     IniaGene = models.ForeignKey(IniaGene, on_delete=models.CASCADE)
+
+
+class SavedSearch(models.Model):
+    search_parameters = JSONField()
+

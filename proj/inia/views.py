@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.db.models import F, Q
 from django.core.paginator import Paginator
 from django.conf import settings
-from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType, Homologene
+from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType, SavedSearch
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from .analysis.intersect import hypergeometric_score, format_hypergeometric_score, custom_dataset_intersection
@@ -39,7 +39,7 @@ def analysis_multisearch(request):
         id = request.GET.get('id')
         # Load in search inputs
         if id:
-            inputs = open_tmp_search_file(id)
+            inputs = open_tmp_search(id)
             result_table, not_found = multisearch_results(inputs['genes'],
                                                           species=inputs['species'],
                                                           return_not_found=True)
@@ -65,14 +65,10 @@ def analysis_multisearch(request):
             # Store input sin a temporary file...? Maybe move this out to db?
             inputs = {'species': species,
                       'genes': genes,
-                      'title': dataset_title,
-                      'id': str(random.randint(10000000,999999999999))}
-            # Make sure file doesn't exist... if does reassign ID.  Very unlikely in the first place.
-            while os.path.isfile(os.path.join(settings.PROJECT_DIR, 'tmp', inputs['id']+'.json')):
-                inputs['id'] = str(random.randint(10000000,999999999999))
-
-            with open(os.path.join(settings.PROJECT_DIR, 'tmp', inputs['id']+'.json'), 'w') as f:
-                f.write(json.dumps(inputs))
+                      'title': dataset_title
+                      }
+            search = SavedSearch.objects.create(search_parameters=inputs)
+            inputs['id'] = search.id
 
         # Don't ever do anything wiht post, just return redirect.
         # add url to self...
@@ -351,7 +347,7 @@ def dataset_network(request):
     if request.GET.get('id'):
         # TODO: Some duplicated code here...
         data_sets = Dataset.objects.all().order_by('name').prefetch_related('iniagene_set')
-        inputs = open_tmp_search_file(request.GET.get('id'))
+        inputs = open_tmp_search(request.GET.get('id'))
         genes = multisearch_results(inputs['genes'], species=inputs['species'])
         # order same way in generate_dataset_matrix to make table match up...
         inputs['bonferonni'] = []
@@ -369,7 +365,7 @@ def overrepresentation_analysis(request):
     inputs = {}
     result_table = []
     if request.GET.get('id'):
-        inputs = open_tmp_search_file(request.GET.get('id'))
+        inputs = open_tmp_search(request.GET.get('id'))
         genes  = multisearch_results(inputs['genes'], species=inputs['species'])
 
         data_sets = Dataset.objects.all().order_by('name')
@@ -401,13 +397,13 @@ def overrepresentation_analysis(request):
     return render(request, 'overrepresentation_analysis.html', {'inputs': inputs, 'result_table': result_table})
 
 
-def open_tmp_search_file(id):
-    inputs = {}
+def open_tmp_search(id):
     try:
-        with open(os.path.join(settings.PROJECT_DIR, 'tmp', id + '.json'), 'r') as f:
-            inputs = json.load(f)
+        search = SavedSearch.objects.get(pk=id)
+        inputs = search.search_parameters
     except:
-        pass
+        return {}
+    inputs['id'] = search.id
     return inputs
 
 
