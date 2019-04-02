@@ -61,7 +61,6 @@ def gene_network_cytoscape_elements(graph):
     cytoscape_js = ''
     # step 1: nodes.
     for node in graph['nodes']:
-        print (node['symbol'])
         cytoscape_js += '{data: {id: \''+node['symbol']+'\' }},'
 
     for edge in graph['edges']:

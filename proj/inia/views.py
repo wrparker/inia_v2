@@ -358,6 +358,8 @@ def gene_network(request):
     if not request.GET.get('id'):
         return redirect('inia:analysis_multisearch')
     else:
+        # TODO: do we strip ' *' from the name?
+        # ex: mouse dglucy
         starting_color = '#e8ffff'  # increments of 50.
         inputs = open_tmp_search(request.GET.get('id'))
         genes = multisearch_results(inputs['genes'], species=inputs['species'])
