@@ -55,3 +55,19 @@ def advanced_gene_search_filters_as_table(request):
         filter_html += '</tr>'
     filter_html += '</table>'
     return mark_safe(filter_html)
+
+@register.simple_tag(name='gene_network_cytoscape_elements')
+def gene_network_cytoscape_elements(graph):
+    cytoscape_js = ''
+    # step 1: nodes.
+    for node in graph['nodes']:
+        print (node['symbol'])
+        cytoscape_js += '{data: {id: \''+node['symbol']+'\' }},'
+
+    for edge in graph['edges']:
+        cytoscape_js += "{data: { id: '"+edge['id'] + "', " \
+                        "source: '" + edge['source'] + "', " \
+                        "target: '"+edge['destination'] + "', " \
+                        "label: '"+edge['label'] + "' }},"
+
+    return mark_safe(cytoscape_js)

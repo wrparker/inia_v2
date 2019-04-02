@@ -366,10 +366,14 @@ def gene_network(request):
         graph['edges'] = []
         for combo in combinations(genes, 2):
             edge = {}
-            edge['num_overlap'] = len(list(set(combo[0]['datasets']) & set(combo[1]['datasets'])))
-            edge['source'] = combo[0][inputs['species']]
-            edge['destination'] = combo[1][inputs['species']]
-            graph['edges'].append(edge)
+            overlapping_datasets = list(set(combo[0]['datasets']) & set(combo[1]['datasets']))
+            edge['num_overlap'] = len(overlapping_datasets)
+            if edge['num_overlap'] > 1:
+                edge['label'] = ', '.join([o.name for o in overlapping_datasets])
+                edge['source'] = combo[0][inputs['species']]
+                edge['destination'] = combo[1][inputs['species']]
+                edge['id'] = '{}-{}'.format(edge['source'], edge['destination'])
+                graph['edges'].append(edge)
     return render(request, 'gene_network.html', {'graph': graph})
 
 def overrepresentation_analysis(request):

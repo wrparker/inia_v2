@@ -83,15 +83,7 @@
           container: document.getElementById('cy'), // container to render in
 
           elements: [ // list of graph elements to start with
-            { // node a
-              data: { id: 'a' }
-            },
-            { // node b
-              data: { id: 'b' }
-            },
-            { // edge ab
-              data: { id: 'a-b', source: 'a', target: 'b', label: 'fer2017, fer2016' }
-            }
+              {% gene_network_cytoscape_elements graph %}
           ],
 
           style: [ // the stylesheet for the graph
