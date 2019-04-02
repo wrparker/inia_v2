@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2><strong>ANALYSIS</strong></h2>
-<h2>DATASET NETWORK</h2>
+<h2>GENE NETWORK</h2>
     <div class="outputLinksAnalysis">
     <a href="{% url 'inia:analysis_multisearch' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Dataset Summary</a> |
         <strong><a href="{% url 'inia:gene_network' %}{% if inputs %}?id={{ inputs.id }}{% endif %}">Gene Network</a> |</strong>
@@ -22,6 +22,15 @@
         they are connected by an edge (a line) whose thickness is proportional to the number of datasets the nodes both
         appear in. In addition, hovering the mouse over an edge will display these datasets.
     </p>
+
+    <div id="cy">
+
+    </div>
+    <div id="mouse_over_edge">asfsdafd</div>
+    <p>
+        <button class="png_export">Export as PNG</button>
+        <button class="json_export">Export as json</button>
+    </p>
     {% include '_abbreviation_info.html' %}
 
    <h3>{{ inputs.title}} Dataset ID: {{inputs.id }} ({{inputs.species}})</h3>
@@ -31,3 +40,115 @@
     You can access this dataset for 48 hours using this link: <a href="{{ request.get_full_path }}">{{request.get_full_path }}</a>
 
 {%  endblock %}
+
+{% block extrajs %}
+    <style>
+        #cy {
+            margin: 0 auto;
+            width: 60%;
+            height: 300px;
+            display: block;
+            background-color:white;
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+    #mouse_over_edge{
+        position:absolute;
+        display:None;
+        width:auto;
+        z-index:1000;
+        border: #1A5991 1px solid;
+        background-color: #84BCD6;
+        padding:5px;
+    }
+    </style>
+    <script type="text/javascript" src="{% static "js/cytoscape.js" %}" ></script>
+
+    <script type="text/javascript">
+    // Used to show mouseover stuff....
+    function hoverdiv(e, divid){
+
+
+        var div = document.getElementById(divid);
+
+
+
+
+        return false;
+    }
+
+    $(document).ready(function(){
+        var cy = cytoscape({
+
+          container: document.getElementById('cy'), // container to render in
+
+          elements: [ // list of graph elements to start with
+            { // node a
+              data: { id: 'a' }
+            },
+            { // node b
+              data: { id: 'b' }
+            },
+            { // edge ab
+              data: { id: 'a-b', source: 'a', target: 'b', label: 'fer2017, fer2016' }
+            }
+          ],
+
+          style: [ // the stylesheet for the graph
+            {
+              selector: 'node',
+              style: {
+                'background-color': '#666',
+                'content': 'data(id)',
+                "text-valign": "center",
+                "text-halign": "center",
+                  "color": '#ffffff'
+              }
+            },
+            {
+              selector: 'node[id="b"]',
+              style: {
+                'background-color': '#000000',
+                'content': 'data(id)',
+                "text-valign": "center",
+                "text-halign": "center",
+              }
+            },
+
+            {
+              selector: 'edge',
+              style: {
+                'width': 0.5,   // This changes a f(x) of number of datasets appear.
+                'line-color': '#000000',
+                'target-arrow-color': '#000000',
+                'target-arrow-shape': 'triangle',
+              }
+            }
+          ],
+
+          layout: {
+            name: 'grid',
+            rows: 1
+          }
+
+        });
+
+        cy.on('mouseover', 'edge', function(evt){
+            var edge = evt.target;
+            var left  = evt.originalEvent.pageX  + "px";
+            var top  =  evt.originalEvent.pageY + "px";
+            $('#mouse_over_edge').css('left', left)
+            $('#mouse_over_edge').css('top', top)
+            $('#mouse_over_edge').text(edge.json().data.label);
+            $('#mouse_over_edge').toggle();
+            console.log(edge.json().data.label)
+        });
+        cy.on('mouseout', 'edge', function(evt){
+            $('#mouse_over_edge').toggle();
+
+        });
+
+    });
+    </script>
+
+{% endblock %}

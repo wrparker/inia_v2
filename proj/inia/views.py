@@ -1,22 +1,18 @@
-import os
-import json
 import tempfile
 import csv
-import random
 from django.http import HttpResponse
 from urllib.parse import unquote, parse_qs, urlencode
 from django.shortcuts import render, redirect
 from django.db.models import F, Q
 from django.core.paginator import Paginator
-from django.conf import settings
 from .models import Publication, Dataset, BrainRegion, IniaGene, SpeciesType, SavedSearch
 from .forms import ContactForm
 from .analysis.search import base_gene_search, LegacyAPIHelper
 from .analysis.intersect import hypergeometric_score, format_hypergeometric_score, custom_dataset_intersection
 from .analysis.multisearch import multisearch_results
+from .common import open_tmp_search, dict_list_to_csv, color_variant
 from functools import reduce
-import scipy.stats as stats
-import numpy as np
+from itertools import combinations
 
 import logging
 
@@ -359,7 +355,22 @@ def dataset_network(request):
     return render(request, 'dataset_network.html', {'brain_regions': brain_regions,
                                                     'inputs': inputs})
 def gene_network(request):
-    return render(request, 'gene_network.html', {})
+    if not request.GET.get('id'):
+        return redirect('inia:analysis_multisearch')
+    else:
+        starting_color = '#e8ffff'  # increments of 50.
+        inputs = open_tmp_search(request.GET.get('id'))
+        genes = multisearch_results(inputs['genes'], species=inputs['species'])
+        graph = {}
+        graph['nodes'] = [{'symbol': gene[inputs['species']], 'num_datasets': len(gene['datasets'])} for gene in genes]
+        graph['edges'] = []
+        for combo in combinations(genes, 2):
+            edge = {}
+            edge['num_overlap'] = len(list(set(combo[0]['datasets']) & set(combo[1]['datasets'])))
+            edge['source'] = combo[0][inputs['species']]
+            edge['destination'] = combo[1][inputs['species']]
+            graph['edges'].append(edge)
+    return render(request, 'gene_network.html', {'graph': graph})
 
 def overrepresentation_analysis(request):
     inputs = {}
@@ -397,29 +408,3 @@ def overrepresentation_analysis(request):
     return render(request, 'overrepresentation_analysis.html', {'inputs': inputs, 'result_table': result_table})
 
 
-def open_tmp_search(id):
-    try:
-        search = SavedSearch.objects.get(pk=id)
-        inputs = search.search_parameters
-    except:
-        return {}
-    inputs['id'] = search.id
-    return inputs
-
-
-def dict_list_to_csv(dict_list):
-    '''
-    :param dict_list: A list of dictionaries
-    :return: None if invalid input, file location if valid.
-    '''
-    if len(dict_list) < 1:
-        return None
-    keys = dict_list[0].keys()
-    tmp_file = tempfile.mkstemp(suffix='.csv', prefix='output')
-    with open(tmp_file[1], 'w') as f:
-        dict_writer = csv.DictWriter(f,
-                                     fieldnames=keys,
-                                     quoting=csv.QUOTE_ALL)
-        dict_writer.writeheader()
-        dict_writer.writerows(dict_list)
-    return tmp_file[1]
