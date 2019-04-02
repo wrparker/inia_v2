@@ -68,6 +68,7 @@ def gene_network_cytoscape_elements(graph):
         cytoscape_js += "{data: { id: '"+edge['id'] + "', " \
                         "source: '" + edge['source'] + "', " \
                         "target: '"+edge['destination'] + "', " \
-                        "label: '"+edge['label'] + "' }},"
+                        "label: '"+edge['label'] + "'," \
+                        "num_overlap: '"+edge['num_overlap']+"', }},"
 
     return mark_safe(cytoscape_js)

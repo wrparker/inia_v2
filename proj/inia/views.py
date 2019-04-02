@@ -374,7 +374,8 @@ def gene_network(request):
                 edge['destination'] = combo[1][inputs['species']]
                 edge['id'] = '{}-{}'.format(edge['source'], edge['destination'])
                 graph['edges'].append(edge)
-    return render(request, 'gene_network.html', {'graph': graph})
+    return render(request, 'gene_network.html', {'graph': graph,
+                                                 'inputs':inputs})
 
 def overrepresentation_analysis(request):
     inputs = {}
