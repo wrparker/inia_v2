@@ -1,6 +1,7 @@
 from django import template
 from django.utils.safestring import mark_safe
-from inia.models import BrainRegion
+from inia.common import color_variant
+from inia.models import BrainRegion, Dataset
 from inia.analysis.search import LegacyAPIHelper
 
 register = template.Library()
@@ -61,13 +62,27 @@ def gene_network_cytoscape_elements(graph):
     cytoscape_js = ''
     # step 1: nodes.
     for node in graph['nodes']:
-        cytoscape_js += '{data: {id: \''+node['symbol']+'\' }},'
+        cytoscape_js += '{data: {id: \''+node['symbol']+'\', num_datasets: \''+str(node['num_datasets'])+'\' }},\n'
 
     for edge in graph['edges']:
         cytoscape_js += "{data: { id: '"+edge['id'] + "', " \
                         "source: '" + edge['source'] + "', " \
                         "target: '"+edge['destination'] + "', " \
                         "label: '"+edge['label'] + "'," \
-                        "num_overlap: '"+edge['num_overlap']+"', }},"
+                        "num_overlap: '"+str(edge['num_overlap'])+"', }},\n"
 
     return mark_safe(cytoscape_js)
+
+@register.simple_tag(name='gene_network_cytoscape_edge_width')
+def gene_network_cytoscape_edge_width():
+    color = '#e8ffff'  # increments of 25.
+    cytoscape_js = ''
+    num = Dataset.objects.all().count()
+    for i in range(num):
+        cytoscape_js += '{selector: "edge[num_overlap=\''+str(i)+'\']", style:{width:'+str(i)+'}},\n'
+        cytoscape_js += '{selector: "node[num_datasets=\''+str(i)+'\']", style:{\'background-color\':\''+color+'\'}},\n'
+        if i < num:
+            color = color_variant(color, -5)
+    return mark_safe(cytoscape_js)
+
+

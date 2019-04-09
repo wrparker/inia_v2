@@ -360,7 +360,7 @@ def gene_network(request):
     else:
         # TODO: do we strip ' *' from the name?
         # ex: mouse dglucy
-        starting_color = '#e8ffff'  # increments of 50.
+
         inputs = open_tmp_search(request.GET.get('id'))
         genes = multisearch_results(inputs['genes'], species=inputs['species'])
         graph = {}
@@ -370,14 +370,14 @@ def gene_network(request):
             edge = {}
             overlapping_datasets = list(set(combo[0]['datasets']) & set(combo[1]['datasets']))
             edge['num_overlap'] = len(overlapping_datasets)
-            if edge['num_overlap'] > 1:
+            if edge['num_overlap'] > 0:
                 edge['label'] = ', '.join([o.name for o in overlapping_datasets])
                 edge['source'] = combo[0][inputs['species']]
                 edge['destination'] = combo[1][inputs['species']]
                 edge['id'] = '{}-{}'.format(edge['source'], edge['destination'])
                 graph['edges'].append(edge)
     return render(request, 'gene_network.html', {'graph': graph,
-                                                 'inputs':inputs})
+                                                 'inputs': inputs})
 
 def overrepresentation_analysis(request):
     inputs = {}
