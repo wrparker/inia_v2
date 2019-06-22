@@ -1,6 +1,8 @@
 import sys
 globals().update(vars(sys.modules["settings"]))
 
+ALLOWED_HOSTS += ['inia.nmtechgroup.com']
+
 DEBUG = False
 
 DATABASES = {
