@@ -123,7 +123,7 @@ class Homologene(models.Model):
     Items that share the same homlogene_group_id across species are homologenes.
     '''
     homologene_group_id = models.IntegerField(db_index=True)  # NCBI reference
-    gene_symbol = models.CharField(max_length=255)
+    gene_symbol = models.CharField(db_index=True, max_length=255)
     created_at = models.DateField(auto_now=True)
     updated_at = models.DateField(auto_now=True)
     species = models.CharField(choices=SpeciesType.SPECIES_CHOICES, max_length=255)
@@ -150,7 +150,7 @@ class IniaGene(models.Model):  # Genes we do through experimentation
     legacy_id = models.IntegerField(db_index=True)  # From version 1.
     ncbi_uid = models.IntegerField(default=None, null=True)  # same as enterez id
     probe_id = models.CharField(max_length=255)  # Some kind of variable like LILMN_41111
-    gene_symbol = models.CharField(max_length=255, blank=True)
+    gene_symbol = models.CharField(db_index=True, max_length=255, blank=True)
     gene_name = models.CharField(max_length=255)
     p_value = models.FloatField(null=True, blank=True)  # stats
     fdr = models.FloatField()   # false discovery rate
@@ -185,4 +185,3 @@ class GeneAliases(models.Model):
 
 class SavedSearch(models.Model):
     search_parameters = JSONField()
-
