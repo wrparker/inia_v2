@@ -151,7 +151,7 @@ class IniaGene(models.Model):  # Genes we do through experimentation
     ncbi_uid = models.IntegerField(default=None, null=True)  # same as enterez id
     probe_id = models.CharField(max_length=255)  # Some kind of variable like LILMN_41111
     gene_symbol = models.CharField(db_index=True, max_length=255, blank=True)
-    gene_name = models.CharField(max_length=255)
+    gene_name = models.CharField(db_index=True, max_length=255)
     p_value = models.FloatField(null=True, blank=True)  # stats
     fdr = models.FloatField()   # false discovery rate
     direction = models.CharField(max_length=255, choices=DIRECTION_CHOICES)
