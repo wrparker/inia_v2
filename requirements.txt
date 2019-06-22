@@ -12,3 +12,4 @@ psycopg2-binary==2.7.7
 mygene==3.1.0
 scipy==1.2.1
 sentry-sdk==0.7.6
+uwsgi==2.0.18

@@ -13,11 +13,20 @@ echo 'timeout = 1' >> .virtualenv/pip.conf
 echo 'index-url =  https://pypi.org/simple' >> .virtualenv/pip.conf
 virtualenv -p `which python3` .virtualenv --no-site-packages -v
 source ./.virtualenv/bin/activate
-echo "Checking pip"
-which pip
-echo "Installing Requirements"
-pip3 install -r requirements.txt --index https://pypi.org/simple
-echo "Performing Migrations"
-python proj/manage.py migrate
-deactivate
-echo "Environment Installed... make sure .env is available."
+
+if [[ "$VIRTUAL_ENV" != "" ]]
+then
+    echo "Checking pip"
+    which pip
+    echo "Installing Requirements"
+    pip3 install -r requirements.txt --index https://pypi.org/simple
+    echo "Performing Migrations"
+    python proj/manage.py migrate
+    deactivate
+    echo "Environment Installed... make sure .env is available."
+else
+  echo 'Failed to create virtualenv, exiting.'
+  exit 1
+fi
+
+
