@@ -1,6 +1,6 @@
 Django==2.2.13
 django-filter==2.0.0
-djangorestframework==3.9.0
+djangorestframework==3.9.1
 pytz==2018.4
 wheel==0.24.0
 python-dotenv===0.8.2
